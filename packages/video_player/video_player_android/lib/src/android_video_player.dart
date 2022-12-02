@@ -118,6 +118,21 @@ class AndroidVideoPlayer extends VideoPlayerPlatform {
   }
 
   @override
+  Future<void> enterPictureInPicture(
+    int textureId,
+    double width,
+    double height,
+  ) async {
+    _api.enterPictureInPicture(
+      EnterPictureInPictureMessage(
+        textureId: textureId,
+        width: width,
+        height: height,
+      ),
+    );
+  }
+
+  @override
   Stream<VideoEvent> videoEventsFor(int textureId) {
     return _eventChannelFor(textureId)
         .receiveBroadcastStream()

@@ -4,12 +4,20 @@
 
 package io.flutter.plugins.videoplayer;
 
+import android.app.Activity;
+import android.app.PictureInPictureParams;
 import android.content.Context;
 import android.os.Build;
 import android.util.LongSparseArray;
+import android.util.Rational;
+
+import androidx.annotation.NonNull;
+
 import io.flutter.FlutterInjector;
 import io.flutter.Log;
 import io.flutter.embedding.engine.plugins.FlutterPlugin;
+import io.flutter.embedding.engine.plugins.activity.ActivityAware;
+import io.flutter.embedding.engine.plugins.activity.ActivityPluginBinding;
 import io.flutter.plugin.common.BinaryMessenger;
 import io.flutter.plugin.common.EventChannel;
 import io.flutter.plugins.videoplayer.Messages.AndroidVideoPlayerApi;
@@ -27,7 +35,7 @@ import java.util.Map;
 import javax.net.ssl.HttpsURLConnection;
 
 /** Android platform implementation of the VideoPlayerPlugin. */
-public class VideoPlayerPlugin implements FlutterPlugin, AndroidVideoPlayerApi {
+public class VideoPlayerPlugin implements FlutterPlugin, AndroidVideoPlayerApi, ActivityAware {
   private static final String TAG = "VideoPlayerPlugin";
   private final LongSparseArray<VideoPlayer> videoPlayers = new LongSparseArray<>();
   private FlutterState flutterState;
@@ -211,6 +219,37 @@ public class VideoPlayerPlugin implements FlutterPlugin, AndroidVideoPlayerApi {
     options.mixWithOthers = arg.getMixWithOthers();
   }
 
+  @Override
+  public void enterPictureInPicture(Messages.EnterPictureInPictureMessage arg) {
+    if(flutterState.activity != null) {
+      if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+        flutterState.activity.enterPictureInPictureMode(new PictureInPictureParams.Builder()
+                .setAspectRatio(new Rational(arg.getWidth().intValue(), arg.getHeight().intValue()))
+                .build());
+      }
+    }
+  }
+
+  @Override
+  public void onAttachedToActivity(@NonNull ActivityPluginBinding binding) {
+    flutterState.activity = binding.getActivity();
+  }
+
+  @Override
+  public void onDetachedFromActivityForConfigChanges() {
+    // Not implemented yet.
+  }
+
+  @Override
+  public void onReattachedToActivityForConfigChanges(@NonNull ActivityPluginBinding binding) {
+    flutterState.activity = binding.getActivity();
+  }
+
+  @Override
+  public void onDetachedFromActivity() {
+    // Not implemented yet.
+  }
+
   private interface KeyForAssetFn {
     String get(String asset);
   }
@@ -225,6 +264,7 @@ public class VideoPlayerPlugin implements FlutterPlugin, AndroidVideoPlayerApi {
     private final KeyForAssetFn keyForAsset;
     private final KeyForAssetAndPackageName keyForAssetAndPackageName;
     private final TextureRegistry textureRegistry;
+    private Activity activity;
 
     FlutterState(
         Context applicationContext,
@@ -237,6 +277,7 @@ public class VideoPlayerPlugin implements FlutterPlugin, AndroidVideoPlayerApi {
       this.keyForAsset = keyForAsset;
       this.keyForAssetAndPackageName = keyForAssetAndPackageName;
       this.textureRegistry = textureRegistry;
+      this.activity = null;
     }
 
     void startListening(VideoPlayerPlugin methodCallHandler, BinaryMessenger messenger) {
