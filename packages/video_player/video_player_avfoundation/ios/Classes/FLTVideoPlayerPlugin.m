@@ -6,6 +6,7 @@
 
 #import <AVFoundation/AVFoundation.h>
 #import <GLKit/GLKit.h>
+#import <AVKit/AVKit.h>
 
 #import "AVAssetTrackUtils.h"
 #import "messages.g.h"
@@ -33,7 +34,7 @@
 }
 @end
 
-@interface FLTVideoPlayer : NSObject <FlutterTexture, FlutterStreamHandler>
+@interface FLTVideoPlayer : NSObject <FlutterTexture, FlutterStreamHandler,AVPictureInPictureControllerDelegate>
 @property(readonly, nonatomic) AVPlayer *player;
 @property(readonly, nonatomic) AVPlayerItemVideoOutput *videoOutput;
 // This is to fix 2 bugs: 1. blank video for encrypted video streams on iOS 16
@@ -50,6 +51,7 @@
 @property(nonatomic, readonly) BOOL isPlaying;
 @property(nonatomic) BOOL isLooping;
 @property(nonatomic, readonly) BOOL isInitialized;
+@property(nonatomic) AVPictureInPictureController *pictureInPictureController;
 - (instancetype)initWithURL:(NSURL *)url
                frameUpdater:(FLTFrameUpdater *)frameUpdater
                 httpHeaders:(nonnull NSDictionary<NSString *, NSString *> *)headers;
@@ -248,7 +250,10 @@ NS_INLINE UIViewController *rootViewController() {
   // invisible AVPlayerLayer is used to overwrite the protection of pixel buffers in those streams
   // for issue #1, and restore the correct width and height for issue #2.
   _playerLayer = [AVPlayerLayer playerLayerWithPlayer:_player];
+  _playerLayer.opacity = 0.001;
   [rootViewController().view.layer addSublayer:_playerLayer];
+    
+  [self setupPipController];
 
   [self createVideoOutputAndDisplayLink:frameUpdater];
 
@@ -257,6 +262,24 @@ NS_INLINE UIViewController *rootViewController() {
   [asset loadValuesAsynchronouslyForKeys:@[ @"tracks" ] completionHandler:assetCompletionHandler];
 
   return self;
+}
+
+- (void)setupPipController {
+  if ([AVPictureInPictureController isPictureInPictureSupported]) {
+    self.pictureInPictureController =
+        [[AVPictureInPictureController alloc] initWithPlayerLayer:self.playerLayer];
+    [self setAutomaticallyStartPictureInPicture:NO];
+    self.pictureInPictureController.delegate = self;
+  }
+}
+
+- (void)setAutomaticallyStartPictureInPicture:
+(BOOL)canStartPictureInPictureAutomaticallyFromInline {
+    if (!self.pictureInPictureController) return;
+    if (@available(iOS 14.2, *)) {
+        self.pictureInPictureController.canStartPictureInPictureAutomaticallyFromInline =
+        canStartPictureInPictureAutomaticallyFromInline;
+    }
 }
 
 - (void)observeValueForKeyPath:(NSString *)path
@@ -443,6 +466,21 @@ NS_INLINE UIViewController *rootViewController() {
 
   _player.rate = speed;
 }
+
+- (void)enterPictureInPicture:(NSNumber *)width
+                        withHeight:(NSNumber *)height {
+    
+  if (self.pictureInPictureController &&
+      ![self.pictureInPictureController isPictureInPictureActive]) {
+      CGRect frame = CGRectMake(0,
+                                     0,
+                                     width.floatValue,
+                                     height.floatValue);
+    self.playerLayer.frame = frame;
+    [self.pictureInPictureController startPictureInPicture];
+  }
+}
+
 
 - (CVPixelBufferRef)copyPixelBuffer {
   CMTime outputItemTime = [_videoOutput itemTimeForHostTime:CACurrentMediaTime()];
@@ -656,6 +694,12 @@ NS_INLINE UIViewController *rootViewController() {
   } else {
     [[AVAudioSession sharedInstance] setCategory:AVAudioSessionCategoryPlayback error:nil];
   }
+}
+
+- (void)enterPictureInPicture:(FLTEnterPictureInPictureMessage *)input
+                        error:(FlutterError *_Nullable __autoreleasing *)error {
+  FLTVideoPlayer *player = self.playersByTextureId[input.textureId];
+  [player enterPictureInPicture:input.width withHeight:input.height];
 }
 
 @end
