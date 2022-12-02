@@ -660,6 +660,11 @@ class VideoPlayerController extends ValueNotifier<VideoPlayerValue> {
     _closedCaptionFileFuture = closedCaptionFile;
   }
 
+  ///
+  Future<void> enterPictureInPicture(double width, double height) async {
+    await _videoPlayerPlatform.enterPictureInPicture(_textureId, width, height);
+  }
+
   Future<void> _updateClosedCaptionWithFuture(
     Future<ClosedCaptionFile>? closedCaptionFile,
   ) async {

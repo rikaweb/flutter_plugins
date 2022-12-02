@@ -102,6 +102,16 @@ abstract class VideoPlayerPlatform extends PlatformInterface {
   Future<void> setMixWithOthers(bool mixWithOthers) {
     throw UnimplementedError('setMixWithOthers() has not been implemented.');
   }
+
+  ///
+  Future<void> enterPictureInPicture(
+    int textureId,
+    double width,
+    double height,
+  ) {
+    throw UnimplementedError(
+        'enterPictureInPicture() has not been implemented.');
+  }
 }
 
 class _PlaceholderImplementation extends VideoPlayerPlatform {}
