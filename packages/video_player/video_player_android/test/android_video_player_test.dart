@@ -413,6 +413,14 @@ void main() {
       expect(log.setEmbeddedSubtitlesMessage?.groupIndex, 0);
       expect(log.setEmbeddedSubtitlesMessage?.renderIndex, 2);
     });
+
+    test('enterPictureInPictureMessage', () async {
+      await player.enterPictureInPicture(1,100,200);
+      expect(log.log.last, 'enterPictureInPicture');
+      expect(log.enterPictureInPictureMessage?.textureId, 1);
+      expect(log.enterPictureInPictureMessage?.width, 100);
+      expect(log.enterPictureInPictureMessage?.height, 200);
+    });
   });
 }
 
