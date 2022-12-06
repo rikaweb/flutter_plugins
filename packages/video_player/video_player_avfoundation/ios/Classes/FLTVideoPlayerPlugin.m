@@ -481,6 +481,22 @@ NS_INLINE UIViewController *rootViewController() {
   }
 }
 
+- (void)pictureInPictureControllerDidStartPictureInPicture:
+    (AVPictureInPictureController *)pictureInPictureController {
+  _eventSink(@{
+    @"event" : @"isPictureInPictureEnabled",
+    @"value" : @"true",
+  });
+}
+
+
+- (void)pictureInPictureControllerDidStopPictureInPicture:
+    (AVPictureInPictureController *)pictureInPictureController {
+  _eventSink(@{
+    @"event" : @"isPictureInPictureEnabled",
+    @"value" : @"false",
+  });
+}
 
 - (CVPixelBufferRef)copyPixelBuffer {
   CMTime outputItemTime = [_videoOutput itemTimeForHostTime:CACurrentMediaTime()];

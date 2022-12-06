@@ -137,7 +137,6 @@ class AVFoundationVideoPlayer extends VideoPlayerPlatform {
           );
         case 'bufferingUpdate':
           final List<dynamic> values = map['values'] as List<dynamic>;
-
           return VideoEvent(
             buffered: values.map<DurationRange>(_toDurationRange).toList(),
             eventType: VideoEventType.bufferingUpdate,
@@ -146,6 +145,11 @@ class AVFoundationVideoPlayer extends VideoPlayerPlatform {
           return VideoEvent(eventType: VideoEventType.bufferingStart);
         case 'bufferingEnd':
           return VideoEvent(eventType: VideoEventType.bufferingEnd);
+        case 'isPictureInPictureEnabled':
+          return VideoEvent(
+              eventType: VideoEventType.isPictureInPictureEnabled,
+              bufferedData: map['value']?.toString()
+          );
         default:
           return VideoEvent(eventType: VideoEventType.unknown);
       }
