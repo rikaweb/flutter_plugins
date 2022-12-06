@@ -51,6 +51,7 @@ class VideoPlayerValue {
     this.playbackSpeed = 1.0,
     this.rotationCorrection = 0,
     this.errorDescription,
+    this.isPictureInPictureEnabled = false,
   });
 
   /// Returns an instance for a video that hasn't been loaded.
@@ -119,6 +120,9 @@ class VideoPlayerValue {
   /// Indicates whether or not the video has been loaded and is ready to play.
   final bool isInitialized;
 
+  ///
+  final bool isPictureInPictureEnabled;
+
   /// Indicates whether or not the video is in an error state. If this is true
   /// [errorDescription] should have information about the problem.
   bool get hasError => errorDescription != null;
@@ -157,6 +161,7 @@ class VideoPlayerValue {
     double? playbackSpeed,
     int? rotationCorrection,
     String? errorDescription = _defaultErrorDescription,
+    bool? isPictureInPictureEnabled,
   }) {
     return VideoPlayerValue(
       duration: duration ?? this.duration,
@@ -172,6 +177,8 @@ class VideoPlayerValue {
       volume: volume ?? this.volume,
       playbackSpeed: playbackSpeed ?? this.playbackSpeed,
       rotationCorrection: rotationCorrection ?? this.rotationCorrection,
+      isPictureInPictureEnabled:
+          isPictureInPictureEnabled ?? this.isPictureInPictureEnabled,
       errorDescription: errorDescription != _defaultErrorDescription
           ? errorDescription
           : this.errorDescription,
@@ -193,7 +200,8 @@ class VideoPlayerValue {
         'isBuffering: $isBuffering, '
         'volume: $volume, '
         'playbackSpeed: $playbackSpeed, '
-        'errorDescription: $errorDescription)';
+        'errorDescription: $errorDescription, '
+        'isPictureInPictureEnabled: $isPictureInPictureEnabled)';
   }
 }
 
@@ -401,6 +409,12 @@ class VideoPlayerController extends ValueNotifier<VideoPlayerValue> {
           value = value.copyWith(isBuffering: false);
           break;
         case VideoEventType.unknown:
+          break;
+        case VideoEventType.isPictureInPictureEnabled:
+          final bool isEnabled = event.bufferedData == 'true';
+          if (value.isPictureInPictureEnabled != isEnabled) {
+            value = value.copyWith(isPictureInPictureEnabled: isEnabled);
+          }
           break;
       }
     }

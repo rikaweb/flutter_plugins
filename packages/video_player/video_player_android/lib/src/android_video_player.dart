@@ -162,6 +162,11 @@ class AndroidVideoPlayer extends VideoPlayerPlatform {
           return VideoEvent(eventType: VideoEventType.bufferingStart);
         case 'bufferingEnd':
           return VideoEvent(eventType: VideoEventType.bufferingEnd);
+        case 'isPictureInPictureEnabled':
+          return VideoEvent(
+            eventType: VideoEventType.isPictureInPictureEnabled,
+            bufferedData: (map['value'] as bool?).toString()
+          );
         default:
           return VideoEvent(eventType: VideoEventType.unknown);
       }

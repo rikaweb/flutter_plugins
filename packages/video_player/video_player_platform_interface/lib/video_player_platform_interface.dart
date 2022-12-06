@@ -110,7 +110,8 @@ abstract class VideoPlayerPlatform extends PlatformInterface {
     double height,
   ) {
     throw UnimplementedError(
-        'enterPictureInPicture() has not been implemented.');
+      'enterPictureInPicture() has not been implemented.',
+    );
   }
 }
 
@@ -222,6 +223,7 @@ class VideoEvent {
     this.size,
     this.rotationCorrection,
     this.buffered,
+    this.bufferedData,
   });
 
   /// The type of the event.
@@ -247,6 +249,9 @@ class VideoEvent {
   /// Only used if [eventType] is [VideoEventType.bufferingUpdate].
   final List<DurationRange>? buffered;
 
+  /// Data which will be use in current buffer.
+  final String? bufferedData;
+
   @override
   bool operator ==(Object other) {
     return identical(this, other) ||
@@ -256,6 +261,7 @@ class VideoEvent {
             duration == other.duration &&
             size == other.size &&
             rotationCorrection == other.rotationCorrection &&
+            bufferedData == bufferedData &&
             listEquals(buffered, other.buffered);
   }
 
@@ -266,6 +272,7 @@ class VideoEvent {
         size,
         rotationCorrection,
         buffered,
+        bufferedData,
       );
 }
 
@@ -288,6 +295,9 @@ enum VideoEventType {
 
   /// The video stopped to buffer.
   bufferingEnd,
+
+  ///
+  isPictureInPictureEnabled,
 
   /// An unknown event has been received.
   unknown,

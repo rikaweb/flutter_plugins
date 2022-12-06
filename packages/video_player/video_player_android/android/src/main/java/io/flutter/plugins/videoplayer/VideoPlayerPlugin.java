@@ -12,12 +12,16 @@ import android.util.LongSparseArray;
 import android.util.Rational;
 
 import androidx.annotation.NonNull;
+import androidx.lifecycle.Lifecycle;
+import androidx.lifecycle.LifecycleEventObserver;
+import androidx.lifecycle.LifecycleOwner;
 
 import io.flutter.FlutterInjector;
 import io.flutter.Log;
 import io.flutter.embedding.engine.plugins.FlutterPlugin;
 import io.flutter.embedding.engine.plugins.activity.ActivityAware;
 import io.flutter.embedding.engine.plugins.activity.ActivityPluginBinding;
+import io.flutter.embedding.engine.plugins.lifecycle.HiddenLifecycleReference;
 import io.flutter.plugin.common.BinaryMessenger;
 import io.flutter.plugin.common.EventChannel;
 import io.flutter.plugins.videoplayer.Messages.AndroidVideoPlayerApi;
@@ -35,7 +39,8 @@ import java.util.Map;
 import javax.net.ssl.HttpsURLConnection;
 
 /** Android platform implementation of the VideoPlayerPlugin. */
-public class VideoPlayerPlugin implements FlutterPlugin, AndroidVideoPlayerApi, ActivityAware {
+public class VideoPlayerPlugin implements FlutterPlugin, AndroidVideoPlayerApi, ActivityAware,
+        LifecycleEventObserver{
   private static final String TAG = "VideoPlayerPlugin";
   private final LongSparseArray<VideoPlayer> videoPlayers = new LongSparseArray<>();
   private FlutterState flutterState;
@@ -221,9 +226,11 @@ public class VideoPlayerPlugin implements FlutterPlugin, AndroidVideoPlayerApi, 
 
   @Override
   public void enterPictureInPicture(Messages.EnterPictureInPictureMessage arg) {
-    if(flutterState.activity != null) {
+    if(flutterState.binding != null) {
+      Activity activity = flutterState.binding.getActivity();
+
       if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-        flutterState.activity.enterPictureInPictureMode(new PictureInPictureParams.Builder()
+        activity.enterPictureInPictureMode(new PictureInPictureParams.Builder()
                 .setAspectRatio(new Rational(arg.getWidth().intValue(), arg.getHeight().intValue()))
                 .build());
       }
@@ -232,22 +239,41 @@ public class VideoPlayerPlugin implements FlutterPlugin, AndroidVideoPlayerApi, 
 
   @Override
   public void onAttachedToActivity(@NonNull ActivityPluginBinding binding) {
-    flutterState.activity = binding.getActivity();
+    flutterState.binding = binding;
+    ((HiddenLifecycleReference)flutterState.binding.getLifecycle()).getLifecycle().addObserver(this);
   }
 
   @Override
   public void onDetachedFromActivityForConfigChanges() {
-    // Not implemented yet.
+    if(flutterState.binding != null) {
+        ((HiddenLifecycleReference) flutterState.binding.getLifecycle()).getLifecycle().removeObserver(this);
+    }
   }
 
   @Override
   public void onReattachedToActivityForConfigChanges(@NonNull ActivityPluginBinding binding) {
-    flutterState.activity = binding.getActivity();
+    flutterState.binding = binding;
+    ((HiddenLifecycleReference)flutterState.binding.getLifecycle()).getLifecycle().addObserver(this);
   }
 
   @Override
   public void onDetachedFromActivity() {
-    // Not implemented yet.
+    if(flutterState.binding != null) {
+      ((HiddenLifecycleReference) flutterState.binding.getLifecycle()).getLifecycle().removeObserver(this);
+    }
+  }
+
+  @Override
+  public void onStateChanged(@NonNull LifecycleOwner source, @NonNull Lifecycle.Event event) {
+    if (flutterState.binding != null && Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+        boolean isInPictureInPictureMode = flutterState.binding.getActivity().isInPictureInPictureMode();
+        for (int i = 0; i < videoPlayers.size(); i++) {
+            VideoPlayer videoPlayer = videoPlayers.valueAt(i);
+            if(videoPlayer != null) {
+              videoPlayer.pictureInPictureStateChanged(isInPictureInPictureMode);
+            }
+        }
+    }
   }
 
   private interface KeyForAssetFn {
@@ -264,7 +290,7 @@ public class VideoPlayerPlugin implements FlutterPlugin, AndroidVideoPlayerApi, 
     private final KeyForAssetFn keyForAsset;
     private final KeyForAssetAndPackageName keyForAssetAndPackageName;
     private final TextureRegistry textureRegistry;
-    private Activity activity;
+    private ActivityPluginBinding binding;
 
     FlutterState(
         Context applicationContext,
@@ -277,7 +303,7 @@ public class VideoPlayerPlugin implements FlutterPlugin, AndroidVideoPlayerApi, 
       this.keyForAsset = keyForAsset;
       this.keyForAssetAndPackageName = keyForAssetAndPackageName;
       this.textureRegistry = textureRegistry;
-      this.activity = null;
+      this.binding = null;
     }
 
     void startListening(VideoPlayerPlugin methodCallHandler, BinaryMessenger messenger) {
