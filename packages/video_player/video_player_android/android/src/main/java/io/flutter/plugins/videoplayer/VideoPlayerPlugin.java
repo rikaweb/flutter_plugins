@@ -37,6 +37,8 @@ import java.security.KeyManagementException;
 import java.security.NoSuchAlgorithmException;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
+
 import javax.net.ssl.HttpsURLConnection;
 
 /** Android platform implementation of the VideoPlayerPlugin. */
@@ -243,9 +245,13 @@ public class VideoPlayerPlugin implements FlutterPlugin, AndroidVideoPlayerApi, 
       Activity activity = flutterState.binding.getActivity();
 
       if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-        activity.enterPictureInPictureMode(new PictureInPictureParams.Builder()
-                .setAspectRatio(new Rational(arg.getWidth().intValue(), arg.getHeight().intValue()))
-                .build());
+        try{
+          activity.enterPictureInPictureMode(new PictureInPictureParams.Builder()
+                  .setAspectRatio(new Rational(arg.getWidth().intValue(), arg.getHeight().intValue()))
+                  .build());
+        }catch (IllegalStateException e){
+          Log.w(TAG, e.getMessage() != null ? e.getMessage() : "", e);
+        }
       }
     }
   }
