@@ -306,32 +306,32 @@ class _AndroidVideoPlayerApiCodec extends StandardMessageCodec {
     if (value is CreateMessage) {
       buffer.putUint8(128);
       writeValue(buffer, value.encode());
-    } else if (value is GetEmbeddedSubtitlesMessage) {
+    } else if (value is EnterPictureInPictureMessage) {
       buffer.putUint8(129);
       writeValue(buffer, value.encode());
-    } else if (value is LoopingMessage) {
+    } else if (value is GetEmbeddedSubtitlesMessage) {
       buffer.putUint8(130);
       writeValue(buffer, value.encode());
-    } else if (value is MixWithOthersMessage) {
+    } else if (value is LoopingMessage) {
       buffer.putUint8(131);
       writeValue(buffer, value.encode());
-    } else if (value is PlaybackSpeedMessage) {
+    } else if (value is MixWithOthersMessage) {
       buffer.putUint8(132);
       writeValue(buffer, value.encode());
-    } else if (value is PositionMessage) {
+    } else if (value is PlaybackSpeedMessage) {
       buffer.putUint8(133);
       writeValue(buffer, value.encode());
-    } else if (value is SetEmbeddedSubtitlesMessage) {
+    } else if (value is PositionMessage) {
       buffer.putUint8(134);
       writeValue(buffer, value.encode());
-    } else if (value is TextureMessage) {
+    } else if (value is SetEmbeddedSubtitlesMessage) {
       buffer.putUint8(135);
       writeValue(buffer, value.encode());
-    } else if (value is VolumeMessage) {
+    } else if (value is TextureMessage) {
       buffer.putUint8(136);
       writeValue(buffer, value.encode());
     } else if (value is VolumeMessage) {
-      buffer.putUint8(135);
+      buffer.putUint8(137);
       writeValue(buffer, value.encode());
     } else {
       super.writeValue(buffer, value);
@@ -345,27 +345,30 @@ class _AndroidVideoPlayerApiCodec extends StandardMessageCodec {
         return CreateMessage.decode(readValue(buffer)!);
 
       case 129:
-        return GetEmbeddedSubtitlesMessage.decode(readValue(buffer)!);
+        return EnterPictureInPictureMessage.decode(readValue(buffer)!);
 
       case 130:
-        return LoopingMessage.decode(readValue(buffer)!);
+        return GetEmbeddedSubtitlesMessage.decode(readValue(buffer)!);
 
       case 131:
-        return MixWithOthersMessage.decode(readValue(buffer)!);
+        return LoopingMessage.decode(readValue(buffer)!);
 
       case 132:
-        return PlaybackSpeedMessage.decode(readValue(buffer)!);
+        return MixWithOthersMessage.decode(readValue(buffer)!);
 
       case 133:
-        return PositionMessage.decode(readValue(buffer)!);
+        return PlaybackSpeedMessage.decode(readValue(buffer)!);
 
       case 134:
-        return SetEmbeddedSubtitlesMessage.decode(readValue(buffer)!);
+        return PositionMessage.decode(readValue(buffer)!);
 
       case 135:
-        return TextureMessage.decode(readValue(buffer)!);
+        return SetEmbeddedSubtitlesMessage.decode(readValue(buffer)!);
 
       case 136:
+        return TextureMessage.decode(readValue(buffer)!);
+
+      case 137:
         return VolumeMessage.decode(readValue(buffer)!);
 
       default:
