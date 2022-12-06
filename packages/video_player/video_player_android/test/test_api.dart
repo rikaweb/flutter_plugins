@@ -8,39 +8,43 @@
 // @dart = 2.12
 import 'dart:async';
 import 'dart:typed_data' show Uint8List, Int32List, Int64List, Float64List;
-// TODO(a14n): remove this import once Flutter 3.1 or later reaches stable (including flutter/flutter#106316)
-// ignore: unnecessary_import
 import 'package:flutter/foundation.dart' show WriteBuffer, ReadBuffer;
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-// TODO(gaaclarke): This had to be hand tweaked from a relative path.
-import 'package:video_player_android/src/messages.g.dart';
+import '../lib/src/messages.g.dart';
 
 class _TestHostVideoPlayerApiCodec extends StandardMessageCodec {
   const _TestHostVideoPlayerApiCodec();
+
   @override
   void writeValue(WriteBuffer buffer, Object? value) {
     if (value is CreateMessage) {
       buffer.putUint8(128);
       writeValue(buffer, value.encode());
-    } else if (value is LoopingMessage) {
+    } else if (value is GetEmbeddedSubtitlesMessage) {
       buffer.putUint8(129);
       writeValue(buffer, value.encode());
-    } else if (value is MixWithOthersMessage) {
+    } else if (value is LoopingMessage) {
       buffer.putUint8(130);
       writeValue(buffer, value.encode());
-    } else if (value is PlaybackSpeedMessage) {
+    } else if (value is MixWithOthersMessage) {
       buffer.putUint8(131);
       writeValue(buffer, value.encode());
-    } else if (value is PositionMessage) {
+    } else if (value is PlaybackSpeedMessage) {
       buffer.putUint8(132);
       writeValue(buffer, value.encode());
-    } else if (value is TextureMessage) {
+    } else if (value is PositionMessage) {
       buffer.putUint8(133);
       writeValue(buffer, value.encode());
-    } else if (value is VolumeMessage) {
+    } else if (value is SetEmbeddedSubtitlesMessage) {
       buffer.putUint8(134);
+      writeValue(buffer, value.encode());
+    } else if (value is TextureMessage) {
+      buffer.putUint8(135);
+      writeValue(buffer, value.encode());
+    } else if (value is VolumeMessage) {
+      buffer.putUint8(136);
       writeValue(buffer, value.encode());
     } else {
       super.writeValue(buffer, value);
@@ -54,21 +58,27 @@ class _TestHostVideoPlayerApiCodec extends StandardMessageCodec {
         return CreateMessage.decode(readValue(buffer)!);
 
       case 129:
-        return LoopingMessage.decode(readValue(buffer)!);
+        return GetEmbeddedSubtitlesMessage.decode(readValue(buffer)!);
 
       case 130:
-        return MixWithOthersMessage.decode(readValue(buffer)!);
+        return LoopingMessage.decode(readValue(buffer)!);
 
       case 131:
-        return PlaybackSpeedMessage.decode(readValue(buffer)!);
+        return MixWithOthersMessage.decode(readValue(buffer)!);
 
       case 132:
-        return PositionMessage.decode(readValue(buffer)!);
+        return PlaybackSpeedMessage.decode(readValue(buffer)!);
 
       case 133:
-        return TextureMessage.decode(readValue(buffer)!);
+        return PositionMessage.decode(readValue(buffer)!);
 
       case 134:
+        return SetEmbeddedSubtitlesMessage.decode(readValue(buffer)!);
+
+      case 135:
+        return TextureMessage.decode(readValue(buffer)!);
+
+      case 136:
         return VolumeMessage.decode(readValue(buffer)!);
 
       default:
@@ -81,16 +91,31 @@ abstract class TestHostVideoPlayerApi {
   static const MessageCodec<Object?> codec = _TestHostVideoPlayerApiCodec();
 
   void initialize();
+
   TextureMessage create(CreateMessage msg);
+
   void dispose(TextureMessage msg);
+
   void setLooping(LoopingMessage msg);
+
   void setVolume(VolumeMessage msg);
+
   void setPlaybackSpeed(PlaybackSpeedMessage msg);
+
   void play(TextureMessage msg);
+
   PositionMessage position(TextureMessage msg);
+
   void seekTo(PositionMessage msg);
+
   void pause(TextureMessage msg);
+
   void setMixWithOthers(MixWithOthersMessage msg);
+
+  List<GetEmbeddedSubtitlesMessage?> getEmbeddedSubtitles(TextureMessage msg);
+
+  void setEmbeddedSubtitles(SetEmbeddedSubtitlesMessage msg);
+
   static void setup(TestHostVideoPlayerApi? api,
       {BinaryMessenger? binaryMessenger}) {
     {
@@ -295,6 +320,48 @@ abstract class TestHostVideoPlayerApi {
           assert(arg_msg != null,
               'Argument for dev.flutter.pigeon.AndroidVideoPlayerApi.setMixWithOthers was null, expected non-null MixWithOthersMessage.');
           api.setMixWithOthers(arg_msg!);
+          return <Object?, Object?>{};
+        });
+      }
+    }
+    {
+      final BasicMessageChannel<Object?> channel = BasicMessageChannel<Object?>(
+          'dev.flutter.pigeon.AndroidVideoPlayerApi.getEmbeddedSubtitles',
+          codec,
+          binaryMessenger: binaryMessenger);
+      if (api == null) {
+        channel.setMockMessageHandler(null);
+      } else {
+        channel.setMockMessageHandler((Object? message) async {
+          assert(message != null,
+              'Argument for dev.flutter.pigeon.AndroidVideoPlayerApi.getEmbeddedSubtitles was null.');
+          final List<Object?> args = (message as List<Object?>?)!;
+          final TextureMessage? arg_msg = (args[0] as TextureMessage?);
+          assert(arg_msg != null,
+              'Argument for dev.flutter.pigeon.AndroidVideoPlayerApi.getEmbeddedSubtitles was null, expected non-null TextureMessage.');
+          final List<GetEmbeddedSubtitlesMessage?> output =
+              api.getEmbeddedSubtitles(arg_msg!);
+          return <Object?, Object?>{'result': output};
+        });
+      }
+    }
+    {
+      final BasicMessageChannel<Object?> channel = BasicMessageChannel<Object?>(
+          'dev.flutter.pigeon.AndroidVideoPlayerApi.setEmbeddedSubtitles',
+          codec,
+          binaryMessenger: binaryMessenger);
+      if (api == null) {
+        channel.setMockMessageHandler(null);
+      } else {
+        channel.setMockMessageHandler((Object? message) async {
+          assert(message != null,
+              'Argument for dev.flutter.pigeon.AndroidVideoPlayerApi.setEmbeddedSubtitles was null.');
+          final List<Object?> args = (message as List<Object?>?)!;
+          final SetEmbeddedSubtitlesMessage? arg_msg =
+              (args[0] as SetEmbeddedSubtitlesMessage?);
+          assert(arg_msg != null,
+              'Argument for dev.flutter.pigeon.AndroidVideoPlayerApi.setEmbeddedSubtitles was null, expected non-null SetEmbeddedSubtitlesMessage.');
+          api.setEmbeddedSubtitles(arg_msg!);
           return <Object?, Object?>{};
         });
       }
