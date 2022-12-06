@@ -118,7 +118,7 @@ abstract class VideoPlayerPlatform extends PlatformInterface {
         'setEmbeddedSubtitles() has not been implemented.');
   }
 
-  ///
+  /// Sends a request to native to enter in picture in picture mode.
   Future<void> enterPictureInPicture(
     int textureId,
     double width,
@@ -314,7 +314,7 @@ enum VideoEventType {
   /// Updated information on the subtitle.
   subtitleUpdate,
 
-  ///
+  /// Indicates whether the video is playing in picture in picture or not.
   isPictureInPictureEnabled,
 
   /// An unknown event has been received.

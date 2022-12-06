@@ -129,7 +129,7 @@ class VideoPlayerValue {
   /// The currently selected embedded subtitle from the available subtitles of the video
   final EmbeddedSubtitle embeddedSubtitle;
 
-  ///
+  /// Indicates whether the video is playing in picture in picture or not.
   final bool isPictureInPictureEnabled;
 
   /// Indicates whether or not the video is in an error state. If this is true
@@ -719,7 +719,7 @@ class VideoPlayerController extends ValueNotifier<VideoPlayerValue> {
     _closedCaptionFileFuture = closedCaptionFile;
   }
 
-  ///
+  /// Sends a request to native to enter in picture in picture mode.
   Future<void> enterPictureInPicture(double width, double height) async {
     await _videoPlayerPlatform.enterPictureInPicture(_textureId, width, height);
   }

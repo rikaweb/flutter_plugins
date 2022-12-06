@@ -36,7 +36,8 @@
 }
 @end
 
-@interface FLTVideoPlayer : NSObject <FlutterTexture, FlutterStreamHandler,AVPlayerItemLegibleOutputPushDelegate,AVPictureInPictureControllerDelegate>
+@interface FLTVideoPlayer : NSObject <FlutterTexture, FlutterStreamHandler
+    ,AVPlayerItemLegibleOutputPushDelegate,AVPictureInPictureControllerDelegate>
 @property(readonly, nonatomic) AVPlayer *player;
 @property(readonly, nonatomic) AVPlayerItemVideoOutput *videoOutput;
 // This is to fix 2 bugs: 1. blank video for encrypted video streams on iOS 16
@@ -475,14 +476,14 @@ NS_INLINE UIViewController *rootViewController() {
 }
 
 - (void)enterPictureInPicture:(NSNumber *)width
-                        withHeight:(NSNumber *)height {
+                    withHeight:(NSNumber *)height {
 
   if (self.pictureInPictureController &&
       ![self.pictureInPictureController isPictureInPictureActive]) {
       CGRect frame = CGRectMake(0,
-                                     0,
-                                     width.floatValue,
-                                     height.floatValue);
+                                0,
+                                width.floatValue,
+                                height.floatValue);
     self.playerLayer.frame = frame;
     [self.pictureInPictureController startPictureInPicture];
   }
