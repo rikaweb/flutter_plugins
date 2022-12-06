@@ -23,17 +23,25 @@ import com.google.android.exoplayer2.Player.Listener;
 import com.google.android.exoplayer2.audio.AudioAttributes;
 import com.google.android.exoplayer2.source.MediaSource;
 import com.google.android.exoplayer2.source.ProgressiveMediaSource;
+import com.google.android.exoplayer2.source.TrackGroup;
+import com.google.android.exoplayer2.source.TrackGroupArray;
 import com.google.android.exoplayer2.source.dash.DashMediaSource;
 import com.google.android.exoplayer2.source.dash.DefaultDashChunkSource;
 import com.google.android.exoplayer2.source.hls.HlsMediaSource;
 import com.google.android.exoplayer2.source.smoothstreaming.DefaultSsChunkSource;
 import com.google.android.exoplayer2.source.smoothstreaming.SsMediaSource;
+import com.google.android.exoplayer2.text.CueGroup;
+import com.google.android.exoplayer2.trackselection.DefaultTrackSelector;
+import com.google.android.exoplayer2.trackselection.MappingTrackSelector;
+import com.google.android.exoplayer2.trackselection.TrackSelectionOverride;
 import com.google.android.exoplayer2.upstream.DataSource;
 import com.google.android.exoplayer2.upstream.DefaultDataSource;
 import com.google.android.exoplayer2.upstream.DefaultHttpDataSource;
 import com.google.android.exoplayer2.util.Util;
 import io.flutter.plugin.common.EventChannel;
 import io.flutter.view.TextureRegistry;
+
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
@@ -47,6 +55,9 @@ final class VideoPlayer {
   private static final String FORMAT_OTHER = "other";
 
   private ExoPlayer exoPlayer;
+
+  private DefaultTrackSelector trackSelector;
+  private Long textTrackIndex;
 
   private Surface surface;
 
@@ -72,7 +83,12 @@ final class VideoPlayer {
     this.textureEntry = textureEntry;
     this.options = options;
 
-    ExoPlayer exoPlayer = new ExoPlayer.Builder(context).build();
+
+    this.trackSelector = new DefaultTrackSelector(context);
+
+    ExoPlayer exoPlayer = new ExoPlayer.Builder(context)
+          .setTrackSelector(trackSelector)
+          .build();
 
     Uri uri = Uri.parse(dataSource);
     DataSource.Factory dataSourceFactory;
@@ -232,6 +248,24 @@ final class VideoPlayer {
               eventSink.error("VideoError", "Video player had error " + error, null);
             }
           }
+
+            @Override
+          public void onCues(CueGroup cueGroup) {
+              Listener.super.onCues(cueGroup);
+              if(textTrackIndex != null) {
+
+                Map<String, Object> event = new HashMap<>();
+                event.put("event", "subtitle");
+                if (!cueGroup.cues.isEmpty()) {
+                  if (cueGroup.cues.get(0).text != null) {
+                    event.put("value", cueGroup.cues.get(0).text.toString());
+                  }
+                } else {
+                  event.put("value", "");
+                }
+                eventSink.success(event);
+              }
+          }
         });
   }
 
@@ -320,6 +354,77 @@ final class VideoPlayer {
         }
       }
 
+      eventSink.success(event);
+    }
+  }
+
+
+  List<Messages.GetEmbeddedSubtitlesMessage> getEmbeddedSubtitles() {
+    List<Messages.GetEmbeddedSubtitlesMessage> subtitleItems = new ArrayList<>();
+    TrackGroupArray trackGroups;
+    int rendererIndex = 2;
+
+    MappingTrackSelector.MappedTrackInfo trackInfo = trackSelector.getCurrentMappedTrackInfo();
+    if (trackInfo == null) {
+      // TrackSelector not initialized
+      return subtitleItems;
+    }
+
+    trackGroups = trackInfo.getTrackGroups(rendererIndex);
+
+    for (int groupIndex = 0; groupIndex < trackGroups.length; groupIndex++) {
+      TrackGroup group = trackGroups.get(groupIndex);
+      for (int trackIndex = 0; trackIndex < group.length; trackIndex++) {
+
+        if (group.getFormat(trackIndex).language != null && group.getFormat(trackIndex).label != null) {
+          subtitleItems.add(
+                  new Messages.GetEmbeddedSubtitlesMessage.Builder()
+                          .setLanguage(group.getFormat(trackIndex).language)
+                          .setLabel(group.getFormat(trackIndex).label)
+                          .setTrackIndex((long) trackIndex)
+                          .setGroupIndex((long) groupIndex)
+                          .setRenderIndex((long) rendererIndex)
+                          .build()
+          );
+        }
+
+      }
+    }
+
+    return subtitleItems;
+  }
+
+  void setEmbeddedSubtitles(Long trackIndex, Long groupIndex, Long rendererIndex) {
+    this.textTrackIndex = trackIndex;
+    if(trackIndex != null && groupIndex != null && rendererIndex != null) {
+        boolean isDisabled;
+        TrackGroupArray trackGroups;
+
+        MappingTrackSelector.MappedTrackInfo trackInfo =
+                trackSelector == null ? null : trackSelector.getCurrentMappedTrackInfo();
+        if (trackSelector == null || trackInfo == null) {
+            // TrackSelector not initialized
+            return;
+        }
+
+        trackGroups = trackInfo.getTrackGroups(Math.toIntExact(rendererIndex));
+        DefaultTrackSelector.Parameters parameters = trackSelector.getParameters();
+        isDisabled = parameters.getRendererDisabled(Math.toIntExact(rendererIndex));
+
+        DefaultTrackSelector.Parameters.Builder parametersBuilder = trackSelector.buildUponParameters()
+                .setRendererDisabled(C.TRACK_TYPE_VIDEO, false);
+        parametersBuilder.setRendererDisabled(Math.toIntExact(rendererIndex), isDisabled);
+
+        TrackSelectionOverride override = new TrackSelectionOverride(trackGroups.get(Math.toIntExact(groupIndex)), Math.toIntExact(trackIndex));
+
+        parametersBuilder.clearOverrides();
+        parametersBuilder.addOverride(override);
+
+        trackSelector.setParameters(parametersBuilder);
+    }else{
+      Map<String, Object> event = new HashMap<>();
+      event.put("event", "subtitle");
+      event.put("value", "");
       eventSink.success(event);
     }
   }

@@ -118,6 +118,40 @@ class AndroidVideoPlayer extends VideoPlayerPlatform {
   }
 
   @override
+  Future<List<EmbeddedSubtitle>> getEmbeddedSubtitles(int textureId) async {
+    final List<GetEmbeddedSubtitlesMessage?> response =
+        await _api.getEmbeddedSubtitles(TextureMessage(textureId: textureId));
+    return response
+        .whereType<GetEmbeddedSubtitlesMessage>()
+        .map<EmbeddedSubtitle>(
+            (GetEmbeddedSubtitlesMessage item) => EmbeddedSubtitle(
+                  language: item.language,
+                  label: item.label,
+                  trackIndex: item.trackIndex,
+                  groupIndex: item.groupIndex,
+                  renderIndex: item.renderIndex,
+                ))
+        .toList();
+  }
+
+  @override
+  Future<void> setEmbeddedSubtitles(
+    int textureId,
+    EmbeddedSubtitle? embeddedSubtitle,
+  ) {
+    return _api.setEmbeddedSubtitles(
+      SetEmbeddedSubtitlesMessage(
+        textureId: textureId,
+        language: embeddedSubtitle?.language,
+        label: embeddedSubtitle?.label,
+        trackIndex: embeddedSubtitle?.trackIndex,
+        groupIndex: embeddedSubtitle?.groupIndex,
+        renderIndex: embeddedSubtitle?.renderIndex,
+      ),
+    );
+  }
+
+  @override
   Future<void> enterPictureInPicture(
     int textureId,
     double width,
@@ -162,6 +196,11 @@ class AndroidVideoPlayer extends VideoPlayerPlatform {
           return VideoEvent(eventType: VideoEventType.bufferingStart);
         case 'bufferingEnd':
           return VideoEvent(eventType: VideoEventType.bufferingEnd);
+        case 'subtitle':
+          return VideoEvent(
+            eventType: VideoEventType.subtitleUpdate,
+            bufferedData: map['value'] as String?,
+          );
         case 'isPictureInPictureEnabled':
           return VideoEvent(
             eventType: VideoEventType.isPictureInPictureEnabled,

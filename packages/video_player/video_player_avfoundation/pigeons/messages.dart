@@ -57,6 +57,35 @@ class MixWithOthersMessage {
   bool mixWithOthers;
 }
 
+class GetEmbeddedSubtitlesMessage{
+  GetEmbeddedSubtitlesMessage(this.language, this.label, this.trackIndex, this.groupIndex, this.renderIndex);
+
+  final String language;
+  final String label;
+  final int trackIndex;
+  final int groupIndex;
+  final int renderIndex;
+}
+
+class SetEmbeddedSubtitlesMessage {
+  SetEmbeddedSubtitlesMessage(
+      this.textureId,
+      this.language,
+      this.label,
+      this.trackIndex,
+      this.groupIndex,
+      this.renderIndex,
+      );
+
+  final int textureId;
+  final String? language;
+  final String? label;
+  final int? trackIndex;
+  final int? groupIndex;
+  final int? renderIndex;
+}
+
+
 class EnterPictureInPictureMessage {
   EnterPictureInPictureMessage(this.textureId, this.width, this.height);
   int textureId;
@@ -88,6 +117,10 @@ abstract class AVFoundationVideoPlayerApi {
   void pause(TextureMessage msg);
   @ObjCSelector('setMixWithOthers:')
   void setMixWithOthers(MixWithOthersMessage msg);
+  @ObjCSelector('getEmbeddedSubtitles:')
+  List<GetEmbeddedSubtitlesMessage?> getEmbeddedSubtitles(TextureMessage msg);
+  @ObjCSelector('setEmbeddedSubtitles:')
+  void setEmbeddedSubtitles(SetEmbeddedSubtitlesMessage msg);
   @ObjCSelector('enterPictureInPicture:')
   void enterPictureInPicture(EnterPictureInPictureMessage msg);
 }

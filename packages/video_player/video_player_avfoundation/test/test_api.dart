@@ -8,15 +8,11 @@
 // @dart = 2.12
 import 'dart:async';
 import 'dart:typed_data' show Uint8List, Int32List, Int64List, Float64List;
-
-// TODO(a14n): remove this import once Flutter 3.1 or later reaches stable (including flutter/flutter#106316)
-// ignore: unnecessary_import
 import 'package:flutter/foundation.dart' show WriteBuffer, ReadBuffer;
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-// TODO(gaaclarke): The following output had to be tweaked from a relative path to a uri.
-import 'package:video_player_avfoundation/src/messages.g.dart';
+import '../lib/src/messages.g.dart';
 
 class _TestHostVideoPlayerApiCodec extends StandardMessageCodec {
   const _TestHostVideoPlayerApiCodec();
@@ -26,7 +22,7 @@ class _TestHostVideoPlayerApiCodec extends StandardMessageCodec {
     if (value is CreateMessage) {
       buffer.putUint8(128);
       writeValue(buffer, value.encode());
-    } else if (value is EnterPictureInPictureMessage) {
+    } else if (value is GetEmbeddedSubtitlesMessage) {
       buffer.putUint8(129);
       writeValue(buffer, value.encode());
     } else if (value is LoopingMessage) {
@@ -41,11 +37,14 @@ class _TestHostVideoPlayerApiCodec extends StandardMessageCodec {
     } else if (value is PositionMessage) {
       buffer.putUint8(133);
       writeValue(buffer, value.encode());
-    } else if (value is TextureMessage) {
+    } else if (value is SetEmbeddedSubtitlesMessage) {
       buffer.putUint8(134);
       writeValue(buffer, value.encode());
-    } else if (value is VolumeMessage) {
+    } else if (value is TextureMessage) {
       buffer.putUint8(135);
+      writeValue(buffer, value.encode());
+    } else if (value is VolumeMessage) {
+      buffer.putUint8(136);
       writeValue(buffer, value.encode());
     } else {
       super.writeValue(buffer, value);
@@ -59,7 +58,7 @@ class _TestHostVideoPlayerApiCodec extends StandardMessageCodec {
         return CreateMessage.decode(readValue(buffer)!);
 
       case 129:
-        return EnterPictureInPictureMessage.decode(readValue(buffer)!);
+        return GetEmbeddedSubtitlesMessage.decode(readValue(buffer)!);
 
       case 130:
         return LoopingMessage.decode(readValue(buffer)!);
@@ -74,9 +73,12 @@ class _TestHostVideoPlayerApiCodec extends StandardMessageCodec {
         return PositionMessage.decode(readValue(buffer)!);
 
       case 134:
-        return TextureMessage.decode(readValue(buffer)!);
+        return SetEmbeddedSubtitlesMessage.decode(readValue(buffer)!);
 
       case 135:
+        return TextureMessage.decode(readValue(buffer)!);
+
+      case 136:
         return VolumeMessage.decode(readValue(buffer)!);
 
       default:
@@ -110,7 +112,9 @@ abstract class TestHostVideoPlayerApi {
 
   void setMixWithOthers(MixWithOthersMessage msg);
 
-  void enterPictureInPicture(EnterPictureInPictureMessage msg);
+  List<GetEmbeddedSubtitlesMessage?> getEmbeddedSubtitles(TextureMessage msg);
+
+  void setEmbeddedSubtitles(SetEmbeddedSubtitlesMessage msg);
 
   static void setup(TestHostVideoPlayerApi? api,
       {BinaryMessenger? binaryMessenger}) {
@@ -324,7 +328,7 @@ abstract class TestHostVideoPlayerApi {
     }
     {
       final BasicMessageChannel<Object?> channel = BasicMessageChannel<Object?>(
-          'dev.flutter.pigeon.AVFoundationVideoPlayerApi.enterPictureInPicture',
+          'dev.flutter.pigeon.AVFoundationVideoPlayerApi.getEmbeddedSubtitles',
           codec,
           binaryMessenger: binaryMessenger);
       if (api == null) {
@@ -332,13 +336,34 @@ abstract class TestHostVideoPlayerApi {
       } else {
         channel.setMockMessageHandler((Object? message) async {
           assert(message != null,
-              'Argument for dev.flutter.pigeon.AVFoundationVideoPlayerApi.enterPictureInPicture was null.');
+              'Argument for dev.flutter.pigeon.AVFoundationVideoPlayerApi.getEmbeddedSubtitles was null.');
           final List<Object?> args = (message as List<Object?>?)!;
-          final EnterPictureInPictureMessage? arg_msg =
-              (args[0] as EnterPictureInPictureMessage?);
+          final TextureMessage? arg_msg = (args[0] as TextureMessage?);
           assert(arg_msg != null,
-              'Argument for dev.flutter.pigeon.AVFoundationVideoPlayerApi.enterPictureInPicture was null, expected non-null EnterPictureInPictureMessage.');
-          api.enterPictureInPicture(arg_msg!);
+              'Argument for dev.flutter.pigeon.AVFoundationVideoPlayerApi.getEmbeddedSubtitles was null, expected non-null TextureMessage.');
+          final List<GetEmbeddedSubtitlesMessage?> output =
+              api.getEmbeddedSubtitles(arg_msg!);
+          return <Object?, Object?>{'result': output};
+        });
+      }
+    }
+    {
+      final BasicMessageChannel<Object?> channel = BasicMessageChannel<Object?>(
+          'dev.flutter.pigeon.AVFoundationVideoPlayerApi.setEmbeddedSubtitles',
+          codec,
+          binaryMessenger: binaryMessenger);
+      if (api == null) {
+        channel.setMockMessageHandler(null);
+      } else {
+        channel.setMockMessageHandler((Object? message) async {
+          assert(message != null,
+              'Argument for dev.flutter.pigeon.AVFoundationVideoPlayerApi.setEmbeddedSubtitles was null.');
+          final List<Object?> args = (message as List<Object?>?)!;
+          final SetEmbeddedSubtitlesMessage? arg_msg =
+              (args[0] as SetEmbeddedSubtitlesMessage?);
+          assert(arg_msg != null,
+              'Argument for dev.flutter.pigeon.AVFoundationVideoPlayerApi.setEmbeddedSubtitles was null, expected non-null SetEmbeddedSubtitlesMessage.');
+          api.setEmbeddedSubtitles(arg_msg!);
           return <Object?, Object?>{};
         });
       }

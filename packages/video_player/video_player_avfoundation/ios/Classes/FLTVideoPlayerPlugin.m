@@ -5,8 +5,10 @@
 #import "FLTVideoPlayerPlugin.h"
 
 #import <AVFoundation/AVFoundation.h>
+#import <AVFoundation/AVPlayerItemOutput.h>
 #import <GLKit/GLKit.h>
 #import <AVKit/AVKit.h>
+#import <dispatch/queue.h>
 
 #import "AVAssetTrackUtils.h"
 #import "messages.g.h"
@@ -34,7 +36,7 @@
 }
 @end
 
-@interface FLTVideoPlayer : NSObject <FlutterTexture, FlutterStreamHandler,AVPictureInPictureControllerDelegate>
+@interface FLTVideoPlayer : NSObject <FlutterTexture, FlutterStreamHandler,AVPlayerItemLegibleOutputPushDelegate,AVPictureInPictureControllerDelegate>
 @property(readonly, nonatomic) AVPlayer *player;
 @property(readonly, nonatomic) AVPlayerItemVideoOutput *videoOutput;
 // This is to fix 2 bugs: 1. blank video for encrypted video streams on iOS 16
@@ -51,6 +53,7 @@
 @property(nonatomic, readonly) BOOL isPlaying;
 @property(nonatomic) BOOL isLooping;
 @property(nonatomic, readonly) BOOL isInitialized;
+@property(nonatomic, readonly) NSNumber* textTrackIndex;
 @property(nonatomic) AVPictureInPictureController *pictureInPictureController;
 - (instancetype)initWithURL:(NSURL *)url
                frameUpdater:(FLTFrameUpdater *)frameUpdater
@@ -252,7 +255,7 @@ NS_INLINE UIViewController *rootViewController() {
   _playerLayer = [AVPlayerLayer playerLayerWithPlayer:_player];
   _playerLayer.opacity = 0.001;
   [rootViewController().view.layer addSublayer:_playerLayer];
-    
+
   [self setupPipController];
 
   [self createVideoOutputAndDisplayLink:frameUpdater];
@@ -312,6 +315,10 @@ NS_INLINE UIViewController *rootViewController() {
         break;
       case AVPlayerItemStatusReadyToPlay:
         [item addOutput:_videoOutput];
+
+        AVPlayerItemLegibleOutput *captionOutput = [[AVPlayerItemLegibleOutput alloc] init];
+        [captionOutput setDelegate:self queue:dispatch_get_main_queue()];
+        [_player.currentItem addOutput: captionOutput];
         [self setupEventSinkIfReadyToPlay];
         [self updatePlayingState];
         break;
@@ -469,7 +476,7 @@ NS_INLINE UIViewController *rootViewController() {
 
 - (void)enterPictureInPicture:(NSNumber *)width
                         withHeight:(NSNumber *)height {
-    
+
   if (self.pictureInPictureController &&
       ![self.pictureInPictureController isPictureInPictureActive]) {
       CGRect frame = CGRectMake(0,
@@ -530,6 +537,67 @@ NS_INLINE UIViewController *rootViewController() {
   return nil;
 }
 
+
+- (NSArray<FLTGetEmbeddedSubtitlesMessage *> *) getEmbeddedSubtitles {
+    NSArray<AVMediaCharacteristic> *characteristics= _player.currentItem.asset.availableMediaCharacteristicsWithMediaSelectionOptions;
+
+
+    for(int i=0;i<[characteristics count];i++){
+        AVMediaCharacteristic characteristic = characteristics[i];
+        if([characteristic.description isEqual: @"AVMediaCharacteristicLegible"]){
+
+
+            AVMediaSelectionGroup *group = [
+                _player.currentItem.asset mediaSelectionGroupForMediaCharacteristic:characteristic
+            ];
+            NSArray<AVMediaSelectionOption *> *options = [group options];
+
+            NSMutableArray<FLTGetEmbeddedSubtitlesMessage *> *subtitles = [[NSMutableArray alloc]initWithCapacity:[options count]];
+
+            for(int j=0;j<[options count];j++){
+                AVMediaSelectionOption *option = options[j];
+
+                FLTGetEmbeddedSubtitlesMessage *subtitle =
+                    [FLTGetEmbeddedSubtitlesMessage makeWithLanguage:option.locale.localeIdentifier
+                                                               label:option.displayName
+                                                          trackIndex:@(j)
+                                                          groupIndex:@(i)
+                                                         renderIndex:@(2)];
+
+                [subtitles addObject: subtitle];
+            }
+
+            return subtitles;
+        }
+    }
+
+    NSMutableArray<FLTGetEmbeddedSubtitlesMessage *> *subtitles = [[NSMutableArray alloc]initWithCapacity:0];
+    return subtitles;
+}
+
+- (void) setEmbeddedSubtitles:(NSNumber *)trackIndex
+               withGroupIndex:(NSNumber *)groupIndex {
+    _textTrackIndex = trackIndex;
+    if(trackIndex != nil && groupIndex != nil){
+        NSArray<AVMediaCharacteristic> *characteristics= _player.currentItem.asset.availableMediaCharacteristicsWithMediaSelectionOptions;
+        AVMediaCharacteristic characteristic = characteristics[[groupIndex intValue]];
+        AVMediaSelectionGroup *group = [
+            _player.currentItem.asset mediaSelectionGroupForMediaCharacteristic:characteristic
+        ];
+        NSArray<AVMediaSelectionOption *> *options = [group options];
+        AVMediaSelectionOption *option = options[[trackIndex intValue]];
+        [
+            _player.currentItem selectMediaOption:option
+            inMediaSelectionGroup:group
+        ];
+    }else{
+        _eventSink(@{
+            @"event" : @"subtitle",
+            @"value" : @"",
+        });
+    }
+}
+
 /// This method allows you to dispose without touching the event channel.  This
 /// is useful for the case where the Engine is in the process of deconstruction
 /// so the channel is going to die or is already dead.
@@ -549,6 +617,29 @@ NS_INLINE UIViewController *rootViewController() {
   [self.player replaceCurrentItemWithPlayerItem:nil];
   [[NSNotificationCenter defaultCenter] removeObserver:self];
 }
+
+
+- (void)         legibleOutput:(AVPlayerItemLegibleOutput *)output
+    didOutputAttributedStrings:(NSArray<NSAttributedString *> *)strings
+           nativeSampleBuffers:(NSArray *)nativeSamples
+                   forItemTime:(CMTime)itemTime{
+    if(_textTrackIndex != nil){
+        NSString *value = @"";
+        NSAttributedString *string = [strings firstObject];
+
+        if(string != nil){
+            NSAttributedString *string = [strings firstObject];
+            value = [string string];
+        }
+
+
+        _eventSink(@{
+            @"event" : @"subtitle",
+            @"value" : value
+        });
+    }
+}
+
 
 - (void)dispose {
   [self disposeSansEventChannel];
@@ -710,6 +801,18 @@ NS_INLINE UIViewController *rootViewController() {
   } else {
     [[AVAudioSession sharedInstance] setCategory:AVAudioSessionCategoryPlayback error:nil];
   }
+}
+
+- (NSArray<FLTGetEmbeddedSubtitlesMessage *> *) getEmbeddedSubtitles:(FLTTextureMessage *)input
+                                                           error:(FlutterError *_Nullable __autoreleasing *)error {
+    FLTVideoPlayer *player = self.playersByTextureId[input.textureId];
+    return [player getEmbeddedSubtitles];
+}
+
+- (void) setEmbeddedSubtitles:(FLTSetEmbeddedSubtitlesMessage *)input
+                        error:(FlutterError *_Nullable  *_Nonnull)error{
+    FLTVideoPlayer *player = self.playersByTextureId[input.textureId];
+    [player setEmbeddedSubtitles:input.trackIndex withGroupIndex:input.groupIndex];
 }
 
 - (void)enterPictureInPicture:(FLTEnterPictureInPictureMessage *)input

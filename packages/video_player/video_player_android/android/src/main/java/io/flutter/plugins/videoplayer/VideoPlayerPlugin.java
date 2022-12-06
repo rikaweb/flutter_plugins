@@ -35,6 +35,7 @@ import io.flutter.plugins.videoplayer.Messages.VolumeMessage;
 import io.flutter.view.TextureRegistry;
 import java.security.KeyManagementException;
 import java.security.NoSuchAlgorithmException;
+import java.util.List;
 import java.util.Map;
 import javax.net.ssl.HttpsURLConnection;
 
@@ -222,6 +223,18 @@ public class VideoPlayerPlugin implements FlutterPlugin, AndroidVideoPlayerApi, 
   @Override
   public void setMixWithOthers(MixWithOthersMessage arg) {
     options.mixWithOthers = arg.getMixWithOthers();
+  }
+
+  @Override
+  public List<Messages.GetEmbeddedSubtitlesMessage> getEmbeddedSubtitles(TextureMessage arg) {
+    VideoPlayer player = videoPlayers.get(arg.getTextureId());
+    return player.getEmbeddedSubtitles();
+  }
+
+  @Override
+  public void setEmbeddedSubtitles(Messages.SetEmbeddedSubtitlesMessage arg) {
+    VideoPlayer player = videoPlayers.get(arg.getTextureId());
+    player.setEmbeddedSubtitles(arg.getTrackIndex(), arg.getGroupIndex(), arg.getRenderIndex());
   }
 
   @Override
