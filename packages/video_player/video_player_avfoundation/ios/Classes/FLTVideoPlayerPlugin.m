@@ -500,10 +500,12 @@ NS_INLINE UIViewController *rootViewController() {
 
 - (void)pictureInPictureControllerDidStopPictureInPicture:
     (AVPictureInPictureController *)pictureInPictureController {
-  _eventSink(@{
-    @"event" : @"isPictureInPictureEnabled",
-    @"value" : @"false",
-  });
+    if(_eventSink != nil){
+        _eventSink(@{
+            @"event" : @"isPictureInPictureEnabled",
+            @"value" : @"false",
+        });
+    }
 }
 
 - (CVPixelBufferRef)copyPixelBuffer {
