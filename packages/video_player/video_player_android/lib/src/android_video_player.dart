@@ -154,16 +154,24 @@ class AndroidVideoPlayer extends VideoPlayerPlatform {
   @override
   Future<void> enterPictureInPicture(
     int textureId,
-    double width,
-    double height,
+    Rect rect,
   ) async {
     _api.enterPictureInPicture(
       EnterPictureInPictureMessage(
         textureId: textureId,
-        width: width,
-        height: height,
+        width: rect.width,
+        height: rect.height,
       ),
     );
+  }
+
+  @override
+  Future<void> setStartPictureInPictureAutomatically(
+    int textureId,
+    bool isEnabled,
+    Rect rect,
+  ) async {
+    // Ignore method call since it's only for ios
   }
 
   @override

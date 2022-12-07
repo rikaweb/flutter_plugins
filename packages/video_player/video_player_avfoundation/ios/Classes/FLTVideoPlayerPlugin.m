@@ -271,19 +271,12 @@ NS_INLINE UIViewController *rootViewController() {
 - (void)setupPipController {
   if ([AVPictureInPictureController isPictureInPictureSupported]) {
     self.pictureInPictureController =
-        [[AVPictureInPictureController alloc] initWithPlayerLayer:self.playerLayer];
-    [self setAutomaticallyStartPictureInPicture:NO];
+        [[AVPictureInPictureController alloc] initWithPlayerLayer:_playerLayer];
+    if (@available(iOS 14.2, *)) {
+        self.pictureInPictureController.canStartPictureInPictureAutomaticallyFromInline=NO;
+    }
     self.pictureInPictureController.delegate = self;
   }
-}
-
-- (void)setAutomaticallyStartPictureInPicture:
-(BOOL)canStartPictureInPictureAutomaticallyFromInline {
-    if (!self.pictureInPictureController) return;
-    if (@available(iOS 14.2, *)) {
-        self.pictureInPictureController.canStartPictureInPictureAutomaticallyFromInline =
-        canStartPictureInPictureAutomaticallyFromInline;
-    }
 }
 
 - (void)observeValueForKeyPath:(NSString *)path
@@ -475,13 +468,38 @@ NS_INLINE UIViewController *rootViewController() {
   _player.rate = speed;
 }
 
-- (void)enterPictureInPicture:(NSNumber *)width
-                    withHeight:(NSNumber *)height {
+
+- (void)setStartPictureInPictureAutomatically:(NSNumber *)isEnabled
+                                     withLeft:(NSNumber *)left
+                                      withTop:(NSNumber *)top
+                                    withWidth:(NSNumber *)width
+                                   withHeight:(NSNumber *)height
+{
 
   if (self.pictureInPictureController &&
       ![self.pictureInPictureController isPictureInPictureActive]) {
-      CGRect frame = CGRectMake(0,
-                                0,
+      CGRect frame = CGRectMake(left.floatValue,
+                                top.floatValue,
+                                width.floatValue,
+                                height.floatValue);
+      
+    self.playerLayer.frame = frame;
+    if (@available(iOS 14.2, *)) {
+      self.pictureInPictureController.canStartPictureInPictureAutomaticallyFromInline= isEnabled.boolValue;
+    }
+  }
+}
+
+- (void)enterPictureInPicture:(NSNumber *)left
+                    withTop:(NSNumber *)top
+                    withWidth:(NSNumber *)width
+                    withHeight:(NSNumber *)height
+{
+
+  if (self.pictureInPictureController &&
+      ![self.pictureInPictureController isPictureInPictureActive]) {
+      CGRect frame = CGRectMake(left.floatValue,
+                                top.floatValue,
                                 width.floatValue,
                                 height.floatValue);
     self.playerLayer.frame = frame;
@@ -821,7 +839,20 @@ NS_INLINE UIViewController *rootViewController() {
 - (void)enterPictureInPicture:(FLTEnterPictureInPictureMessage *)input
                         error:(FlutterError *_Nullable __autoreleasing *)error {
   FLTVideoPlayer *player = self.playersByTextureId[input.textureId];
-  [player enterPictureInPicture:input.width withHeight:input.height];
+  [player enterPictureInPicture:input.left
+                        withTop:input.top
+                      withWidth:input.width
+                     withHeight:input.height];
+}
+
+- (void)setStartPictureInPictureAutomatically:(FLTSetStartPictureInPictureAutomaticallyMessage *)input
+                                        error:(FlutterError *_Nullable __autoreleasing *)error {
+  FLTVideoPlayer *player = self.playersByTextureId[input.textureId];
+    [player setStartPictureInPictureAutomatically:input.isEnabled
+                        withLeft:input.left
+                        withTop:input.top
+                    withWidth:input.width
+                    withHeight:input.height];
 }
 
 @end

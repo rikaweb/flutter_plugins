@@ -117,30 +117,28 @@ class AVFoundationVideoPlayer extends VideoPlayerPlatform {
     return Duration(milliseconds: response.position);
   }
 
-
-
   @override
   Future<List<EmbeddedSubtitle>> getEmbeddedSubtitles(int textureId) async {
     final List<GetEmbeddedSubtitlesMessage?> response =
-    await _api.getEmbeddedSubtitles(TextureMessage(textureId: textureId));
+        await _api.getEmbeddedSubtitles(TextureMessage(textureId: textureId));
     return response
         .whereType<GetEmbeddedSubtitlesMessage>()
         .map<EmbeddedSubtitle>(
             (GetEmbeddedSubtitlesMessage item) => EmbeddedSubtitle(
-          language: item.language,
-          label: item.label,
-          trackIndex: item.trackIndex,
-          groupIndex: item.groupIndex,
-          renderIndex: item.renderIndex,
-        ))
+                  language: item.language,
+                  label: item.label,
+                  trackIndex: item.trackIndex,
+                  groupIndex: item.groupIndex,
+                  renderIndex: item.renderIndex,
+                ))
         .toList();
   }
 
   @override
   Future<void> setEmbeddedSubtitles(
-      int textureId,
-      EmbeddedSubtitle? embeddedSubtitle,
-      ) {
+    int textureId,
+    EmbeddedSubtitle? embeddedSubtitle,
+  ) {
     return _api.setEmbeddedSubtitles(
       SetEmbeddedSubtitlesMessage(
         textureId: textureId,
@@ -190,8 +188,7 @@ class AVFoundationVideoPlayer extends VideoPlayerPlatform {
         case 'isPictureInPictureEnabled':
           return VideoEvent(
               eventType: VideoEventType.isPictureInPictureEnabled,
-              bufferedData: map['value']?.toString()
-          );
+              bufferedData: map['value']?.toString());
         default:
           return VideoEvent(eventType: VideoEventType.unknown);
       }
@@ -212,14 +209,33 @@ class AVFoundationVideoPlayer extends VideoPlayerPlatform {
   @override
   Future<void> enterPictureInPicture(
     int textureId,
-    double width,
-    double height,
+    Rect rect,
   ) async {
     await _api.enterPictureInPicture(
       EnterPictureInPictureMessage(
         textureId: textureId,
-        width: width,
-        height: height,
+        left: rect.left,
+        top: rect.top,
+        width: rect.width,
+        height: rect.height,
+      ),
+    );
+  }
+
+  @override
+  Future<void> setStartPictureInPictureAutomatically(
+    int textureId,
+    bool isEnabled,
+    Rect rect,
+  ) async {
+    await _api.setStartPictureInPictureAutomatically(
+      SetStartPictureInPictureAutomaticallyMessage(
+        textureId: textureId,
+        isEnabled: isEnabled,
+        left: rect.left,
+        top: rect.top,
+        width: rect.width,
+        height: rect.height,
       ),
     );
   }

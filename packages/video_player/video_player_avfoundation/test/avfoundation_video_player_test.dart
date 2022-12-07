@@ -25,6 +25,8 @@ class _ApiLogger implements TestHostVideoPlayerApi {
   MixWithOthersMessage? mixWithOthersMessage;
   SetEmbeddedSubtitlesMessage? setEmbeddedSubtitlesMessage;
   EnterPictureInPictureMessage? enterPictureInPictureMessage;
+  SetStartPictureInPictureAutomaticallyMessage?
+      setStartPictureInPictureAutomaticallyMessage;
 
   @override
   TextureMessage create(CreateMessage arg) {
@@ -118,6 +120,13 @@ class _ApiLogger implements TestHostVideoPlayerApi {
   void enterPictureInPicture(EnterPictureInPictureMessage arg) {
     log.add('enterPictureInPicture');
     enterPictureInPictureMessage = arg;
+  }
+
+  @override
+  void setStartPictureInPictureAutomatically(
+      SetStartPictureInPictureAutomaticallyMessage arg) {
+    log.add('setStartPictureInPictureAutomatically');
+    setStartPictureInPictureAutomaticallyMessage = arg;
   }
 }
 
@@ -364,7 +373,7 @@ void main() {
 
     test('getEmbeddedSubtitles', () async {
       final List<EmbeddedSubtitle> subtitles =
-      await player.getEmbeddedSubtitles(1);
+          await player.getEmbeddedSubtitles(1);
       expect(log.log.last, 'getEmbeddedSubtitles');
       expect(log.textureMessage?.textureId, 1);
       expect(subtitles.length, 1);
@@ -394,11 +403,24 @@ void main() {
     });
 
     test('enterPictureInPictureMessage', () async {
-      await player.enterPictureInPicture(1,100,200);
+      await player.enterPictureInPicture(
+          1, const Rect.fromLTWH(0, 0, 100, 200));
       expect(log.log.last, 'enterPictureInPicture');
       expect(log.enterPictureInPictureMessage?.textureId, 1);
       expect(log.enterPictureInPictureMessage?.width, 100);
       expect(log.enterPictureInPictureMessage?.height, 200);
+    });
+
+    test('setStartPictureInPictureAutomatically', () async {
+      await player.setStartPictureInPictureAutomatically(
+        1,
+        true,
+        const Rect.fromLTWH(0, 0, 100, 200),
+      );
+      expect(log.log.last, 'setStartPictureInPictureAutomatically');
+      expect(log.setStartPictureInPictureAutomaticallyMessage?.textureId, 1);
+      expect(log.setStartPictureInPictureAutomaticallyMessage?.width, 100);
+      expect(log.setStartPictureInPictureAutomaticallyMessage?.height, 200);
     });
   });
 }

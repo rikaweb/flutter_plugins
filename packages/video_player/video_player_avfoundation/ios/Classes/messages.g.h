@@ -21,6 +21,7 @@ NS_ASSUME_NONNULL_BEGIN
 @class FLTGetEmbeddedSubtitlesMessage;
 @class FLTSetEmbeddedSubtitlesMessage;
 @class FLTEnterPictureInPictureMessage;
+@class FLTSetStartPictureInPictureAutomaticallyMessage;
 
 @interface FLTTextureMessage : NSObject
 /// `init` unavailable to enforce nonnull fields, see the `make` class method.
@@ -119,9 +120,30 @@ NS_ASSUME_NONNULL_BEGIN
 /// `init` unavailable to enforce nonnull fields, see the `make` class method.
 - (instancetype)init NS_UNAVAILABLE;
 + (instancetype)makeWithTextureId:(NSNumber *)textureId
-                            width:(NSNumber *)width
-                           height:(NSNumber *)height;
+    left:(NSNumber *)left
+    top:(NSNumber *)top
+    width:(NSNumber *)width
+    height:(NSNumber *)height;
 @property(nonatomic, strong) NSNumber * textureId;
+@property(nonatomic, strong) NSNumber * left;
+@property(nonatomic, strong) NSNumber * top;
+@property(nonatomic, strong) NSNumber * width;
+@property(nonatomic, strong) NSNumber * height;
+@end
+
+@interface FLTSetStartPictureInPictureAutomaticallyMessage : NSObject
+/// `init` unavailable to enforce nonnull fields, see the `make` class method.
+- (instancetype)init NS_UNAVAILABLE;
++ (instancetype)makeWithTextureId:(NSNumber *)textureId
+    isEnabled:(NSNumber *)isEnabled
+    left:(NSNumber *)left
+    top:(NSNumber *)top
+    width:(NSNumber *)width
+    height:(NSNumber *)height;
+@property(nonatomic, strong) NSNumber * textureId;
+@property(nonatomic, strong) NSNumber * isEnabled;
+@property(nonatomic, strong) NSNumber * left;
+@property(nonatomic, strong) NSNumber * top;
 @property(nonatomic, strong) NSNumber * width;
 @property(nonatomic, strong) NSNumber * height;
 @end
@@ -145,14 +167,12 @@ NSObject<FlutterMessageCodec> *FLTAVFoundationVideoPlayerApiGetCodec(void);
                                     error:(FlutterError *_Nullable *_Nonnull)error;
 - (void)seekTo:(FLTPositionMessage *)msg error:(FlutterError *_Nullable *_Nonnull)error;
 - (void)pause:(FLTTextureMessage *)msg error:(FlutterError *_Nullable *_Nonnull)error;
-- (void)setMixWithOthers:(FLTMixWithOthersMessage *)msg
-                   error:(FlutterError *_Nullable *_Nonnull)error;
-- (NSArray<FLTGetEmbeddedSubtitlesMessage *> *) getEmbeddedSubtitles:(FLTTextureMessage *)input
-                                                               error:(FlutterError *_Nullable  *_Nonnull)error;
-- (void) setEmbeddedSubtitles:(FLTSetEmbeddedSubtitlesMessage *)input
-                        error:(FlutterError *_Nullable  *_Nonnull)error;
-- (void)enterPictureInPicture:(FLTEnterPictureInPictureMessage *)msg
-                        error:(FlutterError *_Nullable *_Nonnull)error;
+- (void)setMixWithOthers:(FLTMixWithOthersMessage *)msg error:(FlutterError *_Nullable *_Nonnull)error;
+/// @return `nil` only when `error != nil`.
+- (nullable NSArray<FLTGetEmbeddedSubtitlesMessage *> *)getEmbeddedSubtitles:(FLTTextureMessage *)msg error:(FlutterError *_Nullable *_Nonnull)error;
+- (void)setEmbeddedSubtitles:(FLTSetEmbeddedSubtitlesMessage *)msg error:(FlutterError *_Nullable *_Nonnull)error;
+- (void)enterPictureInPicture:(FLTEnterPictureInPictureMessage *)msg error:(FlutterError *_Nullable *_Nonnull)error;
+- (void)setStartPictureInPictureAutomatically:(FLTSetStartPictureInPictureAutomaticallyMessage *)msg error:(FlutterError *_Nullable *_Nonnull)error;
 @end
 
 extern void FLTAVFoundationVideoPlayerApiSetup(

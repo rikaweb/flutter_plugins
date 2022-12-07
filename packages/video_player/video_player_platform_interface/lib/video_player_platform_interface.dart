@@ -121,11 +121,25 @@ abstract class VideoPlayerPlatform extends PlatformInterface {
   /// Sends a request to native to enter in picture in picture mode.
   Future<void> enterPictureInPicture(
     int textureId,
-    double width,
-    double height,
+    Rect rect,
   ) {
     throw UnimplementedError(
       'enterPictureInPicture() has not been implemented.',
+    );
+  }
+
+  /// An iOS Specific method to enable AVPlayer to go picture in picture mode
+  /// when app moves background.
+  ///
+  /// * This is by default is false
+  /// * Use [Rect.zero] for case that you are disabling this.
+  Future<void> setStartPictureInPictureAutomatically(
+    int textureId,
+    bool isEnabled,
+    Rect rect,
+  ) {
+    throw UnimplementedError(
+      'setStartPictureInPictureAutomatically() has not been implemented.',
     );
   }
 }

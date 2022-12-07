@@ -46,11 +46,14 @@ class _TestHostVideoPlayerApiCodec extends StandardMessageCodec {
     } else if (value is SetEmbeddedSubtitlesMessage) {
       buffer.putUint8(135);
       writeValue(buffer, value.encode());
-    } else if (value is TextureMessage) {
+    } else if (value is SetStartPictureInPictureAutomaticallyMessage) {
       buffer.putUint8(136);
       writeValue(buffer, value.encode());
-    } else if (value is VolumeMessage) {
+    } else if (value is TextureMessage) {
       buffer.putUint8(137);
+      writeValue(buffer, value.encode());
+    } else if (value is VolumeMessage) {
+      buffer.putUint8(138);
       writeValue(buffer, value.encode());
     } else {
       super.writeValue(buffer, value);
@@ -85,9 +88,13 @@ class _TestHostVideoPlayerApiCodec extends StandardMessageCodec {
         return SetEmbeddedSubtitlesMessage.decode(readValue(buffer)!);
 
       case 136:
-        return TextureMessage.decode(readValue(buffer)!);
+        return SetStartPictureInPictureAutomaticallyMessage.decode(
+            readValue(buffer)!);
 
       case 137:
+        return TextureMessage.decode(readValue(buffer)!);
+
+      case 138:
         return VolumeMessage.decode(readValue(buffer)!);
 
       default:
@@ -126,6 +133,9 @@ abstract class TestHostVideoPlayerApi {
   void setEmbeddedSubtitles(SetEmbeddedSubtitlesMessage msg);
 
   void enterPictureInPicture(EnterPictureInPictureMessage msg);
+
+  void setStartPictureInPictureAutomatically(
+      SetStartPictureInPictureAutomaticallyMessage msg);
 
   static void setup(TestHostVideoPlayerApi? api,
       {BinaryMessenger? binaryMessenger}) {
@@ -396,6 +406,27 @@ abstract class TestHostVideoPlayerApi {
           assert(arg_msg != null,
               'Argument for dev.flutter.pigeon.AVFoundationVideoPlayerApi.enterPictureInPicture was null, expected non-null EnterPictureInPictureMessage.');
           api.enterPictureInPicture(arg_msg!);
+          return <Object?, Object?>{};
+        });
+      }
+    }
+    {
+      final BasicMessageChannel<Object?> channel = BasicMessageChannel<Object?>(
+          'dev.flutter.pigeon.AVFoundationVideoPlayerApi.setStartPictureInPictureAutomatically',
+          codec,
+          binaryMessenger: binaryMessenger);
+      if (api == null) {
+        channel.setMockMessageHandler(null);
+      } else {
+        channel.setMockMessageHandler((Object? message) async {
+          assert(message != null,
+              'Argument for dev.flutter.pigeon.AVFoundationVideoPlayerApi.setStartPictureInPictureAutomatically was null.');
+          final List<Object?> args = (message as List<Object?>?)!;
+          final SetStartPictureInPictureAutomaticallyMessage? arg_msg =
+              (args[0] as SetStartPictureInPictureAutomaticallyMessage?);
+          assert(arg_msg != null,
+              'Argument for dev.flutter.pigeon.AVFoundationVideoPlayerApi.setStartPictureInPictureAutomatically was null, expected non-null SetStartPictureInPictureAutomaticallyMessage.');
+          api.setStartPictureInPictureAutomatically(arg_msg!);
           return <Object?, Object?>{};
         });
       }

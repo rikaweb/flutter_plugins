@@ -720,8 +720,22 @@ class VideoPlayerController extends ValueNotifier<VideoPlayerValue> {
   }
 
   /// Sends a request to native to enter in picture in picture mode.
-  Future<void> enterPictureInPicture(double width, double height) async {
-    await _videoPlayerPlatform.enterPictureInPicture(_textureId, width, height);
+  Future<void> enterPictureInPicture(Rect rect) async {
+    await _videoPlayerPlatform.enterPictureInPicture(_textureId, rect);
+  }
+
+  /// An iOS Specific method to enable AVPlayer to go picture in picture mode
+  /// when app moves background.
+  ///
+  /// * This is by default is false
+  /// * Use [Rect.zero] for case that you are disabling this.
+  Future<void> setStartPictureInPictureAutomatically(
+      bool isEnabled, Rect rect) async {
+    await _videoPlayerPlatform.setStartPictureInPictureAutomatically(
+      _textureId,
+      isEnabled,
+      rect,
+    );
   }
 
   Future<void> _updateClosedCaptionWithFuture(

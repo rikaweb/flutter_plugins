@@ -415,7 +415,7 @@ void main() {
     });
 
     test('enterPictureInPictureMessage', () async {
-      await player.enterPictureInPicture(1,100,200);
+      await player.enterPictureInPicture(1,const Rect.fromLTWH(0, 0, 100, 200));
       expect(log.log.last, 'enterPictureInPicture');
       expect(log.enterPictureInPictureMessage?.textureId, 1);
       expect(log.enterPictureInPictureMessage?.width, 100);
