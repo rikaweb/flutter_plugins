@@ -331,7 +331,8 @@ enum VideoEventType {
   /// Indicates whether the video is playing in picture in picture or not.
   isPictureInPictureEnabled,
 
-  /// Updated information on the subtitle.
+  /// A Boolean value that indicates whether the player is currently playing video in external playback mode.
+  /// Only available for iOS
   externalPlaybackActive,
 
   /// An unknown event has been received.

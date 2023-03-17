@@ -133,7 +133,8 @@ class VideoPlayerValue {
   /// Indicates whether the video is playing in picture in picture or not.
   final bool isPictureInPictureEnabled;
 
-  ///
+  /// A Boolean value that indicates whether the player is currently playing video in external playback mode.
+  /// Only available for iOS
   final bool externalPlaybackActive;
 
   /// Indicates whether or not the video is in an error state. If this is true
