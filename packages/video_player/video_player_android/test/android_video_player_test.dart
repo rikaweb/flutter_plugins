@@ -24,6 +24,7 @@ class _ApiLogger implements TestHostVideoPlayerApi {
   PlaybackSpeedMessage? playbackSpeedMessage;
   MixWithOthersMessage? mixWithOthersMessage;
   SetEmbeddedSubtitlesMessage? setEmbeddedSubtitlesMessage;
+  EnterPictureInPictureMessage? enterPictureInPictureMessage;
 
   @override
   TextureMessage create(CreateMessage arg) {
@@ -111,6 +112,12 @@ class _ApiLogger implements TestHostVideoPlayerApi {
   void setEmbeddedSubtitles(SetEmbeddedSubtitlesMessage msg) {
     log.add('setEmbeddedSubtitles');
     setEmbeddedSubtitlesMessage = msg;
+  }
+
+  @override
+  void enterPictureInPicture(EnterPictureInPictureMessage msg) {
+    log.add('enterPictureInPicture');
+    enterPictureInPictureMessage = msg;
   }
 }
 
@@ -405,6 +412,14 @@ void main() {
       expect(log.setEmbeddedSubtitlesMessage?.trackIndex, 0);
       expect(log.setEmbeddedSubtitlesMessage?.groupIndex, 0);
       expect(log.setEmbeddedSubtitlesMessage?.renderIndex, 2);
+    });
+
+    test('enterPictureInPictureMessage', () async {
+      await player.enterPictureInPicture(1,const Rect.fromLTWH(0, 0, 100, 200));
+      expect(log.log.last, 'enterPictureInPicture');
+      expect(log.enterPictureInPictureMessage?.textureId, 1);
+      expect(log.enterPictureInPictureMessage?.width, 100);
+      expect(log.enterPictureInPictureMessage?.height, 200);
     });
   });
 }

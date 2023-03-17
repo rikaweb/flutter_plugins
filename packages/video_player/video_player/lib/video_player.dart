@@ -57,6 +57,7 @@ class VideoPlayerValue {
     this.rotationCorrection = 0,
     this.errorDescription,
     this.embeddedSubtitle = const EmbeddedSubtitle.none(),
+    this.isPictureInPictureEnabled = false,
   });
 
   /// Returns an instance for a video that hasn't been loaded.
@@ -128,6 +129,9 @@ class VideoPlayerValue {
   /// The currently selected embedded subtitle from the available subtitles of the video
   final EmbeddedSubtitle embeddedSubtitle;
 
+  /// Indicates whether the video is playing in picture in picture or not.
+  final bool isPictureInPictureEnabled;
+
   /// Indicates whether or not the video is in an error state. If this is true
   /// [errorDescription] should have information about the problem.
   bool get hasError => errorDescription != null;
@@ -167,6 +171,7 @@ class VideoPlayerValue {
     int? rotationCorrection,
     String? errorDescription = _defaultErrorDescription,
     EmbeddedSubtitle? embeddedSubtitle,
+    bool? isPictureInPictureEnabled,
   }) {
     return VideoPlayerValue(
       duration: duration ?? this.duration,
@@ -183,6 +188,8 @@ class VideoPlayerValue {
       playbackSpeed: playbackSpeed ?? this.playbackSpeed,
       rotationCorrection: rotationCorrection ?? this.rotationCorrection,
       embeddedSubtitle: embeddedSubtitle ?? this.embeddedSubtitle,
+      isPictureInPictureEnabled:
+          isPictureInPictureEnabled ?? this.isPictureInPictureEnabled,
       errorDescription: errorDescription != _defaultErrorDescription
           ? errorDescription
           : this.errorDescription,
@@ -418,6 +425,12 @@ class VideoPlayerController extends ValueNotifier<VideoPlayerValue> {
           );
           break;
         case VideoEventType.unknown:
+          break;
+        case VideoEventType.isPictureInPictureEnabled:
+          final bool isEnabled = event.bufferedData == 'true';
+          if (value.isPictureInPictureEnabled != isEnabled) {
+            value = value.copyWith(isPictureInPictureEnabled: isEnabled);
+          }
           break;
       }
     }
@@ -704,6 +717,25 @@ class VideoPlayerController extends ValueNotifier<VideoPlayerValue> {
   ) async {
     await _updateClosedCaptionWithFuture(closedCaptionFile);
     _closedCaptionFileFuture = closedCaptionFile;
+  }
+
+  /// Sends a request to native to enter in picture in picture mode.
+  Future<void> enterPictureInPicture(Rect rect) async {
+    await _videoPlayerPlatform.enterPictureInPicture(_textureId, rect);
+  }
+
+  /// An iOS Specific method to enable AVPlayer to go picture in picture mode
+  /// when app moves background.
+  ///
+  /// * This is by default is false
+  /// * Use [Rect.zero] for case that you are disabling this.
+  Future<void> setStartPictureInPictureAutomatically(
+      bool isEnabled, Rect rect) async {
+    await _videoPlayerPlatform.setStartPictureInPictureAutomatically(
+      _textureId,
+      isEnabled,
+      rect,
+    );
   }
 
   Future<void> _updateClosedCaptionWithFuture(

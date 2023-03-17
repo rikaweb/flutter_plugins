@@ -84,6 +84,13 @@ class SetEmbeddedSubtitlesMessage {
   final int? renderIndex;
 }
 
+class EnterPictureInPictureMessage {
+  EnterPictureInPictureMessage(this.textureId, this.width, this.height);
+  int textureId;
+  double width;
+  double height;
+}
+
 @HostApi(dartHostTestHandler: 'TestHostVideoPlayerApi')
 abstract class AndroidVideoPlayerApi {
   void initialize();
@@ -99,4 +106,5 @@ abstract class AndroidVideoPlayerApi {
   void setMixWithOthers(MixWithOthersMessage msg);
   List<GetEmbeddedSubtitlesMessage?> getEmbeddedSubtitles(TextureMessage msg);
   void setEmbeddedSubtitles(SetEmbeddedSubtitlesMessage msg);
+  void enterPictureInPicture(EnterPictureInPictureMessage msg);
 }

@@ -781,84 +781,170 @@ public class Messages {
       return pigeonResult;
     }
   }
+
+  /** Generated class from Pigeon that represents data sent in messages. */
+  public static class EnterPictureInPictureMessage {
+    private @NonNull Long textureId;
+    public @NonNull Long getTextureId() { return textureId; }
+    public void setTextureId(@NonNull Long setterArg) {
+      if (setterArg == null) {
+        throw new IllegalStateException("Nonnull field \"textureId\" is null.");
+      }
+      this.textureId = setterArg;
+    }
+
+    private @NonNull Double width;
+    public @NonNull Double getWidth() { return width; }
+    public void setWidth(@NonNull Double setterArg) {
+      if (setterArg == null) {
+        throw new IllegalStateException("Nonnull field \"width\" is null.");
+      }
+      this.width = setterArg;
+    }
+
+    private @NonNull Double height;
+    public @NonNull Double getHeight() { return height; }
+    public void setHeight(@NonNull Double setterArg) {
+      if (setterArg == null) {
+        throw new IllegalStateException("Nonnull field \"height\" is null.");
+      }
+      this.height = setterArg;
+    }
+
+    /** Constructor is private to enforce null safety; use Builder. */
+    private EnterPictureInPictureMessage() {}
+    public static class Builder {
+      private @Nullable Long textureId;
+      public @NonNull Builder setTextureId(@NonNull Long setterArg) {
+        this.textureId = setterArg;
+        return this;
+      }
+      private @Nullable Double width;
+      public @NonNull Builder setWidth(@NonNull Double setterArg) {
+        this.width = setterArg;
+        return this;
+      }
+      private @Nullable Double height;
+      public @NonNull Builder setHeight(@NonNull Double setterArg) {
+        this.height = setterArg;
+        return this;
+      }
+      public @NonNull EnterPictureInPictureMessage build() {
+        EnterPictureInPictureMessage pigeonReturn = new EnterPictureInPictureMessage();
+        pigeonReturn.setTextureId(textureId);
+        pigeonReturn.setWidth(width);
+        pigeonReturn.setHeight(height);
+        return pigeonReturn;
+      }
+    }
+    @NonNull Map<String, Object> toMap() {
+      Map<String, Object> toMapResult = new HashMap<>();
+      toMapResult.put("textureId", textureId);
+      toMapResult.put("width", width);
+      toMapResult.put("height", height);
+      return toMapResult;
+    }
+    static @NonNull EnterPictureInPictureMessage fromMap(@NonNull Map<String, Object> map) {
+      EnterPictureInPictureMessage pigeonResult = new EnterPictureInPictureMessage();
+      Object textureId = map.get("textureId");
+      pigeonResult.setTextureId((textureId == null) ? null : ((textureId instanceof Integer) ? (Integer)textureId : (Long)textureId));
+      Object width = map.get("width");
+      pigeonResult.setWidth((Double)width);
+      Object height = map.get("height");
+      pigeonResult.setHeight((Double)height);
+      return pigeonResult;
+    }
+  }
   private static class AndroidVideoPlayerApiCodec extends StandardMessageCodec {
     public static final AndroidVideoPlayerApiCodec INSTANCE = new AndroidVideoPlayerApiCodec();
-
     private AndroidVideoPlayerApiCodec() {}
-
     @Override
     protected Object readValueOfType(byte type, ByteBuffer buffer) {
       switch (type) {
-        case (byte) 128:
+        case (byte)128:
           return CreateMessage.fromMap((Map<String, Object>) readValue(buffer));
 
-        case (byte) 129:
+        case (byte)129:
+          return EnterPictureInPictureMessage.fromMap((Map<String, Object>) readValue(buffer));
+
+        case (byte)130:
           return GetEmbeddedSubtitlesMessage.fromMap((Map<String, Object>) readValue(buffer));
 
-        case (byte) 130:
+        case (byte)131:
           return LoopingMessage.fromMap((Map<String, Object>) readValue(buffer));
 
-        case (byte) 131:
+        case (byte)132:
           return MixWithOthersMessage.fromMap((Map<String, Object>) readValue(buffer));
 
-        case (byte) 132:
+        case (byte)133:
           return PlaybackSpeedMessage.fromMap((Map<String, Object>) readValue(buffer));
 
-        case (byte) 133:
+        case (byte)134:
           return PositionMessage.fromMap((Map<String, Object>) readValue(buffer));
 
-        case (byte) 134:
+        case (byte)135:
           return SetEmbeddedSubtitlesMessage.fromMap((Map<String, Object>) readValue(buffer));
 
-        case (byte) 135:
+        case (byte)136:
           return TextureMessage.fromMap((Map<String, Object>) readValue(buffer));
 
-        case (byte) 136:
+        case (byte)137:
           return VolumeMessage.fromMap((Map<String, Object>) readValue(buffer));
 
         default:
           return super.readValueOfType(type, buffer);
+
       }
     }
-
     @Override
-    protected void writeValue(ByteArrayOutputStream stream, Object value) {
+    protected void writeValue(ByteArrayOutputStream stream, Object value)     {
       if (value instanceof CreateMessage) {
         stream.write(128);
         writeValue(stream, ((CreateMessage) value).toMap());
-      } else if (value instanceof GetEmbeddedSubtitlesMessage) {
+      } else
+      if (value instanceof EnterPictureInPictureMessage) {
         stream.write(129);
-        writeValue(stream, ((GetEmbeddedSubtitlesMessage) value).toMap());
-      } else if (value instanceof LoopingMessage) {
+        writeValue(stream, ((EnterPictureInPictureMessage) value).toMap());
+      } else
+      if (value instanceof GetEmbeddedSubtitlesMessage) {
         stream.write(130);
-        writeValue(stream, ((LoopingMessage) value).toMap());
-      } else if (value instanceof MixWithOthersMessage) {
+        writeValue(stream, ((GetEmbeddedSubtitlesMessage) value).toMap());
+      } else
+      if (value instanceof LoopingMessage) {
         stream.write(131);
-        writeValue(stream, ((MixWithOthersMessage) value).toMap());
-      } else if (value instanceof PlaybackSpeedMessage) {
+        writeValue(stream, ((LoopingMessage) value).toMap());
+      } else
+      if (value instanceof MixWithOthersMessage) {
         stream.write(132);
-        writeValue(stream, ((PlaybackSpeedMessage) value).toMap());
-      } else if (value instanceof PositionMessage) {
+        writeValue(stream, ((MixWithOthersMessage) value).toMap());
+      } else
+      if (value instanceof PlaybackSpeedMessage) {
         stream.write(133);
-        writeValue(stream, ((PositionMessage) value).toMap());
-      } else if (value instanceof SetEmbeddedSubtitlesMessage) {
+        writeValue(stream, ((PlaybackSpeedMessage) value).toMap());
+      } else
+      if (value instanceof PositionMessage) {
         stream.write(134);
+        writeValue(stream, ((PositionMessage) value).toMap());
+      } else
+      if (value instanceof SetEmbeddedSubtitlesMessage) {
+        stream.write(135);
         writeValue(stream, ((SetEmbeddedSubtitlesMessage) value).toMap());
       } else
       if (value instanceof TextureMessage) {
-        stream.write(135);
+        stream.write(136);
         writeValue(stream, ((TextureMessage) value).toMap());
       } else
       if (value instanceof VolumeMessage) {
-        stream.write(136);
+        stream.write(137);
         writeValue(stream, ((VolumeMessage) value).toMap());
-      } else {
+      } else
+{
         super.writeValue(stream, value);
       }
     }
   }
 
-  /** Generated interface from Pigeon that represents a handler of messages from Flutter. */
+  /** Generated interface from Pigeon that represents a handler of messages from Flutter.*/
   public interface AndroidVideoPlayerApi {
     void initialize();
 
@@ -884,10 +970,11 @@ public class Messages {
 
     void setMixWithOthers(@NonNull MixWithOthersMessage msg);
 
-    @NonNull
-    List<GetEmbeddedSubtitlesMessage> getEmbeddedSubtitles(@NonNull TextureMessage msg);
+    @NonNull List<GetEmbeddedSubtitlesMessage> getEmbeddedSubtitles(@NonNull TextureMessage msg);
 
     void setEmbeddedSubtitles(@NonNull SetEmbeddedSubtitlesMessage msg);
+
+    void enterPictureInPicture(@NonNull EnterPictureInPictureMessage msg);
 
     /** The codec used by AndroidVideoPlayerApi. */
     static MessageCodec<Object> getCodec() {
@@ -1148,30 +1235,27 @@ public class Messages {
       }
       {
         BasicMessageChannel<Object> channel =
-            new BasicMessageChannel<>(
-                binaryMessenger,
-                "dev.flutter.pigeon.AndroidVideoPlayerApi.setMixWithOthers",
-                getCodec());
-          if (api != null) {
-              channel.setMessageHandler(
-                      (message, reply) -> {
-                          Map<String, Object> wrapped = new HashMap<>();
-                          try {
-                              ArrayList<Object> args = (ArrayList<Object>) message;
-                              MixWithOthersMessage msgArg = (MixWithOthersMessage) args.get(0);
-                              if (msgArg == null) {
-                                  throw new NullPointerException("msgArg unexpectedly null.");
-                              }
-                              api.setMixWithOthers(msgArg);
-                              wrapped.put("result", null);
-                          } catch (Error | RuntimeException exception) {
-                              wrapped.put("error", wrapError(exception));
-                          }
-                          reply.reply(wrapped);
-                      });
-          } else {
-              channel.setMessageHandler(null);
-          }
+            new BasicMessageChannel<>(binaryMessenger, "dev.flutter.pigeon.AndroidVideoPlayerApi.setMixWithOthers", getCodec());
+        if (api != null) {
+          channel.setMessageHandler((message, reply) -> {
+            Map<String, Object> wrapped = new HashMap<>();
+            try {
+              ArrayList<Object> args = (ArrayList<Object>)message;
+              MixWithOthersMessage msgArg = (MixWithOthersMessage)args.get(0);
+              if (msgArg == null) {
+                throw new NullPointerException("msgArg unexpectedly null.");
+              }
+              api.setMixWithOthers(msgArg);
+              wrapped.put("result", null);
+            }
+            catch (Error | RuntimeException exception) {
+              wrapped.put("error", wrapError(exception));
+            }
+            reply.reply(wrapped);
+          });
+        } else {
+          channel.setMessageHandler(null);
+        }
       }
       {
         BasicMessageChannel<Object> channel =
@@ -1221,13 +1305,40 @@ public class Messages {
           channel.setMessageHandler(null);
         }
       }
+      {
+        BasicMessageChannel<Object> channel =
+            new BasicMessageChannel<>(binaryMessenger, "dev.flutter.pigeon.AndroidVideoPlayerApi.enterPictureInPicture", getCodec());
+        if (api != null) {
+          channel.setMessageHandler((message, reply) -> {
+            Map<String, Object> wrapped = new HashMap<>();
+            try {
+              ArrayList<Object> args = (ArrayList<Object>)message;
+              EnterPictureInPictureMessage msgArg = (EnterPictureInPictureMessage)args.get(0);
+              if (msgArg == null) {
+                throw new NullPointerException("msgArg unexpectedly null.");
+              }
+              api.enterPictureInPicture(msgArg);
+              wrapped.put("result", null);
+            }
+            catch (Error | RuntimeException exception) {
+              wrapped.put("error", wrapError(exception));
+            }
+            reply.reply(wrapped);
+          });
+        } else {
+          channel.setMessageHandler(null);
+        }
+      }
     }
   }
+
   private static Map<String, Object> wrapError(Throwable exception) {
     Map<String, Object> errorMap = new HashMap<>();
     errorMap.put("message", exception.toString());
     errorMap.put("code", exception.getClass().getSimpleName());
-    errorMap.put("details", "Cause: " + exception.getCause() + ", Stacktrace: " + Log.getStackTraceString(exception));
+    errorMap.put(
+        "details",
+        "Cause: " + exception.getCause() + ", Stacktrace: " + Log.getStackTraceString(exception));
     return errorMap;
   }
 }

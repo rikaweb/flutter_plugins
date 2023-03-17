@@ -317,6 +317,13 @@ final class VideoPlayer {
     return exoPlayer.getCurrentPosition();
   }
 
+  void pictureInPictureStateChanged(boolean isEnabled) {
+    Map<String, Object> event = new HashMap<>();
+    event.put("event", "isPictureInPictureEnabled");
+    event.put("value", isEnabled);
+    eventSink.success(event);
+  }
+
   @SuppressWarnings("SuspiciousNameCombination")
   @VisibleForTesting
   void sendInitialized() {

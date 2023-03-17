@@ -152,6 +152,29 @@ class AndroidVideoPlayer extends VideoPlayerPlatform {
   }
 
   @override
+  Future<void> enterPictureInPicture(
+    int textureId,
+    Rect rect,
+  ) async {
+    _api.enterPictureInPicture(
+      EnterPictureInPictureMessage(
+        textureId: textureId,
+        width: rect.width,
+        height: rect.height,
+      ),
+    );
+  }
+
+  @override
+  Future<void> setStartPictureInPictureAutomatically(
+    int textureId,
+    bool isEnabled,
+    Rect rect,
+  ) async {
+    // Ignore method call since it's only for ios
+  }
+
+  @override
   Stream<VideoEvent> videoEventsFor(int textureId) {
     return _eventChannelFor(textureId)
         .receiveBroadcastStream()
@@ -185,6 +208,11 @@ class AndroidVideoPlayer extends VideoPlayerPlatform {
           return VideoEvent(
             eventType: VideoEventType.subtitleUpdate,
             bufferedData: map['value'] as String?,
+          );
+        case 'isPictureInPictureEnabled':
+          return VideoEvent(
+            eventType: VideoEventType.isPictureInPictureEnabled,
+            bufferedData: map['value']?.toString(),
           );
         default:
           return VideoEvent(eventType: VideoEventType.unknown);
