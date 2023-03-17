@@ -58,6 +58,7 @@ class VideoPlayerValue {
     this.errorDescription,
     this.embeddedSubtitle = const EmbeddedSubtitle.none(),
     this.isPictureInPictureEnabled = false,
+    this.externalPlaybackActive = false,
   });
 
   /// Returns an instance for a video that hasn't been loaded.
@@ -132,6 +133,9 @@ class VideoPlayerValue {
   /// Indicates whether the video is playing in picture in picture or not.
   final bool isPictureInPictureEnabled;
 
+  ///
+  final bool externalPlaybackActive;
+
   /// Indicates whether or not the video is in an error state. If this is true
   /// [errorDescription] should have information about the problem.
   bool get hasError => errorDescription != null;
@@ -172,6 +176,7 @@ class VideoPlayerValue {
     String? errorDescription = _defaultErrorDescription,
     EmbeddedSubtitle? embeddedSubtitle,
     bool? isPictureInPictureEnabled,
+    bool? externalPlaybackActive,
   }) {
     return VideoPlayerValue(
       duration: duration ?? this.duration,
@@ -193,6 +198,8 @@ class VideoPlayerValue {
       errorDescription: errorDescription != _defaultErrorDescription
           ? errorDescription
           : this.errorDescription,
+      externalPlaybackActive:
+          externalPlaybackActive ?? this.externalPlaybackActive,
     );
   }
 
@@ -211,6 +218,7 @@ class VideoPlayerValue {
         'isBuffering: $isBuffering, '
         'volume: $volume, '
         'playbackSpeed: $playbackSpeed, '
+        'externalPlaybackActive: $externalPlaybackActive, '
         'errorDescription: $errorDescription)';
   }
 }
@@ -425,6 +433,11 @@ class VideoPlayerController extends ValueNotifier<VideoPlayerValue> {
           );
           break;
         case VideoEventType.unknown:
+          break;
+        case VideoEventType.externalPlaybackActive:
+          value = value.copyWith(
+            externalPlaybackActive: event.bufferedData == 'true',
+          );
           break;
         case VideoEventType.isPictureInPictureEnabled:
           final bool isEnabled = event.bufferedData == 'true';

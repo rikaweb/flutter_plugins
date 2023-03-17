@@ -87,6 +87,15 @@ class FakeController extends ValueNotifier<VideoPlayerValue>
 
   @override
   Future<void> setEmbeddedSubtitles(EmbeddedSubtitle embeddedSubtitle) async {}
+
+  @override
+  Future<void> enterPictureInPicture(Rect rect) async {}
+
+  @override
+  Future<void> setStartPictureInPictureAutomatically(
+    bool isEnabled,
+    Rect rect,
+  ) async {}
 }
 
 Future<ClosedCaptionFile> _loadClosedCaption() async =>

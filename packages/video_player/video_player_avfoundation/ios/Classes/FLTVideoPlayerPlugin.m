@@ -68,6 +68,7 @@ static void *durationContext = &durationContext;
 static void *playbackLikelyToKeepUpContext = &playbackLikelyToKeepUpContext;
 static void *playbackBufferEmptyContext = &playbackBufferEmptyContext;
 static void *playbackBufferFullContext = &playbackBufferFullContext;
+static void *externalPlaybackActiveContext = &externalPlaybackActiveContext;
 
 @implementation FLTVideoPlayer
 - (instancetype)initWithAsset:(NSString *)asset frameUpdater:(FLTFrameUpdater *)frameUpdater {
@@ -104,6 +105,11 @@ static void *playbackBufferFullContext = &playbackBufferFullContext;
          forKeyPath:@"playbackBufferFull"
             options:NSKeyValueObservingOptionInitial | NSKeyValueObservingOptionNew
             context:playbackBufferFullContext];
+  [_player addObserver:self
+         forKeyPath:@"externalPlaybackActive"
+            options:0
+            context:externalPlaybackActiveContext];
+
 
   // Add an observer that will respond to itemDidPlayToEndTime
   [[NSNotificationCenter defaultCenter] addObserver:self
@@ -341,6 +347,8 @@ NS_INLINE UIViewController *rootViewController() {
     if (_eventSink != nil) {
       _eventSink(@{@"event" : @"bufferingEnd"});
     }
+  } else if (context == externalPlaybackActiveContext) {
+      [self sendExternalPlaybackState];
   }
 }
 
@@ -634,7 +642,8 @@ NS_INLINE UIViewController *rootViewController() {
   [currentItem removeObserver:self forKeyPath:@"playbackLikelyToKeepUp"];
   [currentItem removeObserver:self forKeyPath:@"playbackBufferEmpty"];
   [currentItem removeObserver:self forKeyPath:@"playbackBufferFull"];
-
+  [_player removeObserver:self forKeyPath:@"externalPlaybackActive"];
+    
   [self.player replaceCurrentItemWithPlayerItem:nil];
   [[NSNotificationCenter defaultCenter] removeObserver:self];
 }
@@ -658,6 +667,13 @@ NS_INLINE UIViewController *rootViewController() {
             @"event" : @"subtitle",
             @"value" : value
         });
+    }
+}
+
+
+- (void)sendExternalPlaybackState {
+    if (_eventSink != nil) {
+      _eventSink(@{@"event" : @"externalPlaybackActive", @"bufferedData" : _player.isExternalPlaybackActive ? @"true" : @"false"});
     }
 }
 

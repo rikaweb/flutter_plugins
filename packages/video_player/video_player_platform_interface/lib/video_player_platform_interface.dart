@@ -331,6 +331,9 @@ enum VideoEventType {
   /// Indicates whether the video is playing in picture in picture or not.
   isPictureInPictureEnabled,
 
+  /// Updated information on the subtitle.
+  externalPlaybackActive,
+
   /// An unknown event has been received.
   unknown,
 }

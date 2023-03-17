@@ -189,6 +189,10 @@ class AVFoundationVideoPlayer extends VideoPlayerPlatform {
           return VideoEvent(
               eventType: VideoEventType.isPictureInPictureEnabled,
               bufferedData: map['value']?.toString());
+        case 'externalPlaybackActive':
+          return VideoEvent(
+              eventType: VideoEventType.externalPlaybackActive,
+              bufferedData: map['bufferedData']?.toString());
         default:
           return VideoEvent(eventType: VideoEventType.unknown);
       }
