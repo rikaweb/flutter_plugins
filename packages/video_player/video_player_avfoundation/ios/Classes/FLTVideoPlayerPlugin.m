@@ -642,8 +642,7 @@ NS_INLINE UIViewController *rootViewController() {
   [currentItem removeObserver:self forKeyPath:@"playbackLikelyToKeepUp"];
   [currentItem removeObserver:self forKeyPath:@"playbackBufferEmpty"];
   [currentItem removeObserver:self forKeyPath:@"playbackBufferFull"];
-  [_player removeObserver:self forKeyPath:@"externalPlaybackActive"];
-    
+
   [self.player replaceCurrentItemWithPlayerItem:nil];
   [[NSNotificationCenter defaultCenter] removeObserver:self];
 }
