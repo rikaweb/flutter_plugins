@@ -12,7 +12,7 @@ import 'package:video_player_avfoundation/src/messages.g.dart';
 import 'package:video_player_avfoundation/video_player_avfoundation.dart';
 import 'package:video_player_platform_interface/video_player_platform_interface.dart';
 
-import 'test_api.dart';
+import 'test_api.g.dart';
 
 class _ApiLogger implements TestHostVideoPlayerApi {
   final List<String> log = <String>[];
@@ -272,16 +272,16 @@ void main() {
     });
 
     test('videoEventsFor', () async {
-      _ambiguate(ServicesBinding.instance)
-          ?.defaultBinaryMessenger
+      _ambiguate(TestDefaultBinaryMessengerBinding.instance)!
+          .defaultBinaryMessenger
           .setMockMessageHandler(
         'flutter.io/videoPlayer/videoEvents123',
         (ByteData? message) async {
           final MethodCall methodCall =
               const StandardMethodCodec().decodeMethodCall(message);
           if (methodCall.method == 'listen') {
-            await _ambiguate(ServicesBinding.instance)
-                ?.defaultBinaryMessenger
+            await _ambiguate(TestDefaultBinaryMessengerBinding.instance)!
+                .defaultBinaryMessenger
                 .handlePlatformMessage(
                     'flutter.io/videoPlayer/videoEvents123',
                     const StandardMethodCodec()
@@ -293,8 +293,8 @@ void main() {
                     }),
                     (ByteData? data) {});
 
-            await _ambiguate(ServicesBinding.instance)
-                ?.defaultBinaryMessenger
+            await _ambiguate(TestDefaultBinaryMessengerBinding.instance)!
+                .defaultBinaryMessenger
                 .handlePlatformMessage(
                     'flutter.io/videoPlayer/videoEvents123',
                     const StandardMethodCodec()
@@ -303,8 +303,8 @@ void main() {
                     }),
                     (ByteData? data) {});
 
-            await _ambiguate(ServicesBinding.instance)
-                ?.defaultBinaryMessenger
+            await _ambiguate(TestDefaultBinaryMessengerBinding.instance)!
+                .defaultBinaryMessenger
                 .handlePlatformMessage(
                     'flutter.io/videoPlayer/videoEvents123',
                     const StandardMethodCodec()
@@ -317,8 +317,8 @@ void main() {
                     }),
                     (ByteData? data) {});
 
-            await _ambiguate(ServicesBinding.instance)
-                ?.defaultBinaryMessenger
+            await _ambiguate(TestDefaultBinaryMessengerBinding.instance)!
+                .defaultBinaryMessenger
                 .handlePlatformMessage(
                     'flutter.io/videoPlayer/videoEvents123',
                     const StandardMethodCodec()
@@ -327,8 +327,8 @@ void main() {
                     }),
                     (ByteData? data) {});
 
-            await _ambiguate(ServicesBinding.instance)
-                ?.defaultBinaryMessenger
+            await _ambiguate(TestDefaultBinaryMessengerBinding.instance)!
+                .defaultBinaryMessenger
                 .handlePlatformMessage(
                     'flutter.io/videoPlayer/videoEvents123',
                     const StandardMethodCodec()
@@ -429,5 +429,4 @@ void main() {
 ///
 /// We use this so that APIs that have become non-nullable can still be used
 /// with `!` and `?` on the stable branch.
-// TODO(ianh): Remove this once we roll stable in late 2021.
 T? _ambiguate<T>(T? value) => value;
