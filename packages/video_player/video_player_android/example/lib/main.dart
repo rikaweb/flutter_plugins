@@ -115,7 +115,8 @@ class _BumbleBeeRemoteVideoState extends State<_BumbleBeeRemoteVideo> {
   void initState() {
     super.initState();
     _controller = MiniController.network(
-      'https://mtoczko.github.io/hls-test-streams/test-vtt-fmp4-segments/playlist.m3u8',
+      // 'https://mtoczko.github.io/hls-test-streams/test-vtt-fmp4-segments/playlist.m3u8',
+      'http://hyper.de1-eu.com:8000/movie/sohrab/13253/304664.mkv',
     );
 
     _controller.addListener(() {
@@ -125,8 +126,11 @@ class _BumbleBeeRemoteVideoState extends State<_BumbleBeeRemoteVideo> {
   }
 
   late List<EmbeddedSubtitle> subtitles = [];
+  late List<EmbeddedAudioTrack> audioTracks = [];
   Future<void> setupSubtitle() async {
     subtitles = await _controller.getEmbeddedSubtitles();
+    _controller.setEmbeddedSubtitles(subtitles.first, false);
+    audioTracks = await _controller.getEmbeddedAuioTracks();
   }
 
   @override
@@ -160,6 +164,13 @@ class _BumbleBeeRemoteVideoState extends State<_BumbleBeeRemoteVideo> {
               ),
             ),
           ),
+          const Text('Subtitles'),
+          SizedBox(
+              child: TextButton(
+                  child: const Text('Disable Subtitle'),
+                  onPressed: () async {
+                    await _controller.setEmbeddedSubtitles(null, true);
+                  })),
           SizedBox(
             // You can adjust these properties as needed
             height: 200,
@@ -172,7 +183,6 @@ class _BumbleBeeRemoteVideoState extends State<_BumbleBeeRemoteVideo> {
                   subtitle: Text(subtitle.language.toString()),
                   onTap: () async {
                     // Set the selected subtitle track
-
                     await _controller.setEmbeddedSubtitles(subtitle, false);
                     // Optionally, perform any additional actions after selection
                   },
@@ -180,12 +190,27 @@ class _BumbleBeeRemoteVideoState extends State<_BumbleBeeRemoteVideo> {
               },
             ),
           ),
+          const Text('Audio Tracks'),
           SizedBox(
-              child: TextButton(
-                  child: const Text('Disable'),
-                  onPressed: () async {
-                    await _controller.setEmbeddedSubtitles(null, true);
-                  }))
+            // You can adjust these properties as needed
+            height: 200,
+            child: ListView.builder(
+              itemCount: audioTracks.length,
+              itemBuilder: (BuildContext context, int index) {
+                final EmbeddedAudioTrack audioTrack = audioTracks[index];
+                return ListTile(
+                  title: Text(audioTrack.label.toString()),
+                  subtitle: Text(audioTrack.language.toString()),
+                  onTap: () async {
+                    // Set the selected subtitle track
+
+                    await _controller.setEmbeddedAudioTrack(audioTrack, false);
+                    // Optionally, perform any additional actions after selection
+                  },
+                );
+              },
+            ),
+          ),
         ],
       ),
     );

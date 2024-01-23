@@ -360,12 +360,26 @@ class MiniController extends ValueNotifier<VideoPlayerValue> {
     await _applyPlaybackSpeed();
   }
 
+  Future<List<EmbeddedAudioTrack>> getEmbeddedAuioTracks() async {
+    return _platform.getEmbeddedAudioTracks(textureId);
+  }
+
   /// Get all available embedded subtitles of the video.
   ///
   /// This is useful for video formats containing embedded subtitles like Hls.
   /// The response items can be used with [setEmbeddedSubtitles] to select and prepare a subtitle.
   Future<List<EmbeddedSubtitle>> getEmbeddedSubtitles() async {
     return _platform.getEmbeddedSubtitles(textureId);
+  }
+
+  /// Select one of the embedded audio tracks of the video.
+
+  Future<void> setEmbeddedAudioTrack(
+      EmbeddedAudioTrack? embeddedAudioTrack, bool disableAudio) async {
+    return await _platform.setEmbeddedAudioTracks(
+      _textureId,
+      embeddedAudioTrack,
+    );
   }
 
   /// Select one of the embedded subtitles of the video.

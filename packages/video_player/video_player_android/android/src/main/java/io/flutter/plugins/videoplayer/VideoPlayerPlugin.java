@@ -217,11 +217,22 @@ public class VideoPlayerPlugin implements FlutterPlugin, AndroidVideoPlayerApi {
     VideoPlayer player = videoPlayers.get(arg.getTextureId());
     return player.getEmbeddedSubtitles();
   }
+  @Override
+  public List<Messages.GetEmbeddedAudioTracksMessage> getEmbeddedAudioTracks(TextureMessage arg) {
+    VideoPlayer player = videoPlayers.get(arg.getTextureId());
+    return player.getEmbeddedAudioTracks();
+  }
 
   @Override
   public void setEmbeddedSubtitles(Messages.SetEmbeddedSubtitlesMessage arg) {
     VideoPlayer player = videoPlayers.get(arg.getTextureId());
     player.setEmbeddedSubtitles(arg.getTrackIndex(), arg.getGroupIndex(), arg.getRenderIndex());
+  }
+
+
+  public void setEmbeddedAudioTracks(Messages.SetEmbeddedAudioTracksMessage arg) {
+    VideoPlayer player = videoPlayers.get(arg.getTextureId());
+    player.setEmbeddedAudioTracks(arg.getTrackIndex(), arg.getGroupIndex(), arg.getRenderIndex());
   }
 
   private interface KeyForAssetFn {
@@ -253,11 +264,11 @@ public class VideoPlayerPlugin implements FlutterPlugin, AndroidVideoPlayerApi {
     }
 
     void startListening(VideoPlayerPlugin methodCallHandler, BinaryMessenger messenger) {
-      AndroidVideoPlayerApi.setup(messenger, methodCallHandler);
+      AndroidVideoPlayerApi.setUp(messenger, methodCallHandler);
     }
 
     void stopListening(BinaryMessenger messenger) {
-      AndroidVideoPlayerApi.setup(messenger, null);
+      AndroidVideoPlayerApi.setUp(messenger, null);
     }
   }
 }

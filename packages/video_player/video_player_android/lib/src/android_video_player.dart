@@ -135,6 +135,23 @@ class AndroidVideoPlayer extends VideoPlayerPlatform {
   }
 
   @override
+  Future<List<EmbeddedAudioTrack>> getEmbeddedAudioTracks(int textureId) async {
+    final List<GetEmbeddedAudioTracksMessage?> response =
+        await _api.getEmbeddedAudioTracks(TextureMessage(textureId: textureId));
+    return response
+        .whereType<GetEmbeddedAudioTracksMessage>()
+        .map<EmbeddedAudioTrack>(
+            (GetEmbeddedAudioTracksMessage item) => EmbeddedAudioTrack(
+                  language: item.language,
+                  label: item.label,
+                  trackIndex: item.trackIndex,
+                  groupIndex: item.groupIndex,
+                  renderIndex: item.renderIndex,
+                ))
+        .toList();
+  }
+
+  @override
   Future<void> setEmbeddedSubtitles(
     int textureId,
     EmbeddedSubtitle? embeddedSubtitle,
@@ -147,6 +164,23 @@ class AndroidVideoPlayer extends VideoPlayerPlatform {
         trackIndex: embeddedSubtitle?.trackIndex,
         groupIndex: embeddedSubtitle?.groupIndex,
         renderIndex: embeddedSubtitle?.renderIndex,
+      ),
+    );
+  }
+
+  @override
+  Future<void> setEmbeddedAudioTracks(
+    int textureId,
+    EmbeddedAudioTrack? embeddedAudioTrack,
+  ) {
+    return _api.setEmbeddedAudioTracks(
+      SetEmbeddedAudioTracksMessage(
+        textureId: textureId,
+        language: embeddedAudioTrack?.language,
+        label: embeddedAudioTrack?.label,
+        trackIndex: embeddedAudioTrack?.trackIndex,
+        groupIndex: embeddedAudioTrack?.groupIndex,
+        renderIndex: embeddedAudioTrack?.renderIndex,
       ),
     );
   }

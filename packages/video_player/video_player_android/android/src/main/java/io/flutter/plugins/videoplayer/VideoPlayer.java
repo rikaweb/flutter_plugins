@@ -47,7 +47,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
+import android.util.Log;
 final class VideoPlayer {
   private static final String FORMAT_SS = "ss";
   private static final String FORMAT_DASH = "dash";
@@ -383,6 +383,71 @@ final class VideoPlayer {
 
     return subtitleItems;
   }
+
+
+  List<Messages.GetEmbeddedAudioTracksMessage> getEmbeddedAudioTracks() {
+    List<Messages.GetEmbeddedAudioTracksMessage> audioTrackItems = new ArrayList<>();
+    TrackGroupArray trackGroups;
+
+    MappingTrackSelector.MappedTrackInfo trackInfo = trackSelector.getCurrentMappedTrackInfo();
+    if (trackInfo == null) {
+        // TrackSelector not initialized
+        return audioTrackItems;
+    }
+
+    // Find the renderer index for audio
+    int audioRendererIndex = -1;
+    for (int i = 0; i < trackInfo.getRendererCount(); i++) {
+        if (trackInfo.getRendererType(i) == C.TRACK_TYPE_AUDIO) {
+            audioRendererIndex = i;
+            break;
+        }
+    }
+
+    if (audioRendererIndex == -1) {
+        // No audio renderer found
+        return audioTrackItems;
+    }
+
+    trackGroups = trackInfo.getTrackGroups(audioRendererIndex);
+
+    for (int groupIndex = 0; groupIndex < trackGroups.length; groupIndex++) {
+        TrackGroup group = trackGroups.get(groupIndex);
+        for (int trackIndex = 0; trackIndex < group.length; trackIndex++) {
+            Format format = group.getFormat(trackIndex);
+            audioTrackItems.add(
+                new Messages.GetEmbeddedAudioTracksMessage.Builder()
+                    .setLanguage(format.language)
+                    .setLabel(format.label != null ? format.label : "Track " + (trackIndex + 1))
+                    .setTrackIndex((long) trackIndex)
+                    .setGroupIndex((long) groupIndex)
+                    .setRenderIndex((long) audioRendererIndex)
+                    .build()
+            );
+        }
+    }
+   
+     System.out.println("audioTrackItems");
+    return audioTrackItems;
+}
+void setEmbeddedAudioTracks(Long trackIndex, Long groupIndex, Long rendererIndex) {
+  MappingTrackSelector.MappedTrackInfo trackInfo = trackSelector.getCurrentMappedTrackInfo();
+  if (trackSelector == null || trackInfo == null) {
+      // TrackSelector not initialized
+      return;
+  }
+
+  if (trackIndex != null && groupIndex != null && rendererIndex != null) {
+      TrackGroupArray trackGroups = trackInfo.getTrackGroups(Math.toIntExact(rendererIndex));
+      DefaultTrackSelector.Parameters.Builder parametersBuilder = trackSelector.buildUponParameters()
+          .setRendererDisabled(Math.toIntExact(rendererIndex), false);
+
+      TrackSelectionOverride override = new TrackSelectionOverride(trackGroups.get(Math.toIntExact(groupIndex)), Math.toIntExact(trackIndex));
+      parametersBuilder.clearOverrides().addOverride(override);
+      trackSelector.setParameters(parametersBuilder);
+  }
+}
+
 
   void setEmbeddedSubtitles(Long trackIndex, Long groupIndex, Long rendererIndex) {
     this.textTrackIndex = trackIndex;

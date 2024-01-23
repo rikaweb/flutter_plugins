@@ -56,8 +56,20 @@ class MixWithOthersMessage {
   bool mixWithOthers;
 }
 
-class GetEmbeddedSubtitlesMessage{
-  GetEmbeddedSubtitlesMessage(this.language, this.label, this.trackIndex, this.groupIndex, this.renderIndex);
+class GetEmbeddedSubtitlesMessage {
+  GetEmbeddedSubtitlesMessage(this.language, this.label, this.trackIndex,
+      this.groupIndex, this.renderIndex);
+
+  final String? language;
+  final String? label;
+  final int trackIndex;
+  final int groupIndex;
+  final int renderIndex;
+}
+
+class GetEmbeddedAudioTracksMessage {
+  GetEmbeddedAudioTracksMessage(this.language, this.label, this.trackIndex,
+      this.groupIndex, this.renderIndex);
 
   final String? language;
   final String? label;
@@ -68,6 +80,24 @@ class GetEmbeddedSubtitlesMessage{
 
 class SetEmbeddedSubtitlesMessage {
   SetEmbeddedSubtitlesMessage(
+    this.textureId,
+    this.language,
+    this.label,
+    this.trackIndex,
+    this.groupIndex,
+    this.renderIndex,
+  );
+
+  final int textureId;
+  final String? language;
+  final String? label;
+  final int? trackIndex;
+  final int? groupIndex;
+  final int? renderIndex;
+}
+
+class SetEmbeddedAudioTracksMessage {
+  SetEmbeddedAudioTracksMessage(
     this.textureId,
     this.language,
     this.label,
@@ -98,5 +128,8 @@ abstract class AndroidVideoPlayerApi {
   void pause(TextureMessage msg);
   void setMixWithOthers(MixWithOthersMessage msg);
   List<GetEmbeddedSubtitlesMessage?> getEmbeddedSubtitles(TextureMessage msg);
+  List<GetEmbeddedAudioTracksMessage?> getEmbeddedAudioTracks(
+      TextureMessage msg);
   void setEmbeddedSubtitles(SetEmbeddedSubtitlesMessage msg);
+  void setEmbeddedAudioTracks(SetEmbeddedAudioTracksMessage msg);
 }

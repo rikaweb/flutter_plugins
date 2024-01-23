@@ -25,7 +25,7 @@ dependencies:
 dev_dependencies:
   flutter_test:
     sdk: flutter
-  pigeon: ^2.0.1
+  pigeon: ^16.0.4
 
 # FOR TESTING ONLY. DO NOT MERGE.
 dependency_overrides:

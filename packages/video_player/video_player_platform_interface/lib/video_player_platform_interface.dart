@@ -109,6 +109,11 @@ abstract class VideoPlayerPlatform extends PlatformInterface {
         'getEmbeddedSubtitles() has not been implemented.');
   }
 
+  Future<List<EmbeddedAudioTrack>> getEmbeddedAudioTracks(int textureId) async {
+    throw UnimplementedError(
+        'getEmbeddedAudioTracks() has not been implemented.');
+  }
+
   /// Select one of the embedded subtitles of the video.
   Future<void> setEmbeddedSubtitles(
     int textureId,
@@ -116,6 +121,14 @@ abstract class VideoPlayerPlatform extends PlatformInterface {
   ) async {
     throw UnimplementedError(
         'setEmbeddedSubtitles() has not been implemented.');
+  }
+
+  Future<void> setEmbeddedAudioTracks(
+    int textureId,
+    EmbeddedAudioTrack? embeddedAudioTrack,
+  ) async {
+    throw UnimplementedError(
+        'setEmbeddedAudioTracks() has not been implemented.');
   }
 }
 
@@ -436,4 +449,44 @@ class EmbeddedSubtitle {
 
   /// Checks whether the embedded subtitle is selected or is for removing the subtitle.
   bool get embeddedSubtitleSelected => trackIndex != null;
+}
+
+class EmbeddedAudioTrack {
+  /// Subtitle option which embedded into video.
+  ///
+  /// * It's recommended not to create a direct instance with this constructor.
+  ///   Try to get it from the video player controller.
+  const EmbeddedAudioTrack({
+    required this.language,
+    required this.label,
+    required this.trackIndex,
+    required this.groupIndex,
+    required this.renderIndex,
+  });
+
+  /// An instance of the embedded subtitle that is used to disable the subtitle stream.
+  const EmbeddedAudioTrack.none()
+      : language = null,
+        label = null,
+        trackIndex = null,
+        groupIndex = null,
+        renderIndex = null;
+
+  /// Language of embedded subtitle
+  final String? language;
+
+  /// Label, associated with each option of the embedded subtitle
+  final String? label;
+
+  /// Subtitle track index, in the list of subtitles in the embedded subtitle
+  final int? trackIndex;
+
+  /// Subtitle group track index in the available tracks for the video.
+  final int? groupIndex;
+
+  /// Subtitle group track render index
+  final int? renderIndex;
+
+  /// Checks whether the embedded subtitle is selected or is for removing the subtitle.
+  bool get embeddedAudioTrackSelected => trackIndex != null;
 }
