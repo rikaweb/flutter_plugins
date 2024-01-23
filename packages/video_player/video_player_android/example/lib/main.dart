@@ -115,8 +115,8 @@ class _BumbleBeeRemoteVideoState extends State<_BumbleBeeRemoteVideo> {
   void initState() {
     super.initState();
     _controller = MiniController.network(
-        // 'https://mtoczko.github.io/hls-test-streams/test-vtt-fmp4-segments/playlist.m3u8',
-        'http://hyper.de1-eu.com:8000/movie/sohrab/13253/304664.mkv');
+      'https://mtoczko.github.io/hls-test-streams/test-vtt-fmp4-segments/playlist.m3u8',
+    );
 
     _controller.addListener(() {
       setState(() {});
