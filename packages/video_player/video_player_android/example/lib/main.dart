@@ -115,13 +115,18 @@ class _BumbleBeeRemoteVideoState extends State<_BumbleBeeRemoteVideo> {
   void initState() {
     super.initState();
     _controller = MiniController.network(
-      'https://mtoczko.github.io/hls-test-streams/test-vtt-fmp4-segments/playlist.m3u8',
-    );
+        // 'https://mtoczko.github.io/hls-test-streams/test-vtt-fmp4-segments/playlist.m3u8',
+        'http://hyper.de1-eu.com:8000/movie/sohrab/13253/304664.mkv');
 
     _controller.addListener(() {
       setState(() {});
     });
     _controller.initialize().then((_) => setupSubtitle());
+  }
+
+  late List<EmbeddedSubtitle> subtitles = [];
+  Future<void> setupSubtitle() async {
+    subtitles = await _controller.getEmbeddedSubtitles();
   }
 
   @override
@@ -155,15 +160,35 @@ class _BumbleBeeRemoteVideoState extends State<_BumbleBeeRemoteVideo> {
               ),
             ),
           ),
+          SizedBox(
+            // You can adjust these properties as needed
+            height: 200,
+            child: ListView.builder(
+              itemCount: subtitles.length,
+              itemBuilder: (BuildContext context, int index) {
+                final EmbeddedSubtitle subtitle = subtitles[index];
+                return ListTile(
+                  title: Text(subtitle.label.toString()),
+                  subtitle: Text(subtitle.language.toString()),
+                  onTap: () async {
+                    // Set the selected subtitle track
+
+                    await _controller.setEmbeddedSubtitles(subtitle, false);
+                    // Optionally, perform any additional actions after selection
+                  },
+                );
+              },
+            ),
+          ),
+          SizedBox(
+              child: TextButton(
+                  child: const Text('Disable'),
+                  onPressed: () async {
+                    await _controller.setEmbeddedSubtitles(null, true);
+                  }))
         ],
       ),
     );
-  }
-
-  Future<void> setupSubtitle() async {
-    final List<EmbeddedSubtitle> subtitles =
-        await _controller.getEmbeddedSubtitles();
-    await _controller.setEmbeddedSubtitles(subtitles.first);
   }
 }
 

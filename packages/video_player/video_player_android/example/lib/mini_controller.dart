@@ -262,7 +262,7 @@ class MiniController extends ValueNotifier<VideoPlayerValue> {
         case VideoEventType.subtitleUpdate:
           value = value.copyWith(
             caption:
-            Caption.fromEmbeddedSubtitle(text: event.bufferedData ?? ''),
+                Caption.fromEmbeddedSubtitle(text: event.bufferedData ?? ''),
           );
           break;
         case VideoEventType.unknown:
@@ -375,7 +375,16 @@ class MiniController extends ValueNotifier<VideoPlayerValue> {
   ///   The updated caption will only include [value.caption.text].
   /// * Use [EmbeddedSubtitle.none] to prevent [value.caption] from being updated
   ///   and to remove the subtitle
-  Future<void> setEmbeddedSubtitles(EmbeddedSubtitle embeddedSubtitle) async {
+  Future<void> setEmbeddedSubtitles(
+      EmbeddedSubtitle? embeddedSubtitle, bool disableSubtitle) async {
+    if (disableSubtitle) {
+      await _platform.setEmbeddedSubtitles(
+        _textureId,
+        EmbeddedSubtitle.none(),
+      );
+      value = value.copyWith(embeddedSubtitle: EmbeddedSubtitle.none());
+      return;
+    }
     await _platform.setEmbeddedSubtitles(
       _textureId,
       embeddedSubtitle,
