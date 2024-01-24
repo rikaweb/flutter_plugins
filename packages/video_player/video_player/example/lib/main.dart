@@ -296,7 +296,7 @@ class _BumbleBeeRemoteVideoState extends State<_BumbleBeeRemoteVideo> {
     } else {
       final List<EmbeddedSubtitle> subtitles =
           await _controller.getEmbeddedSubtitles();
-      await _controller.setEmbeddedSubtitles(subtitles.first);
+      await _controller.setEmbeddedSubtitles(subtitles.first, false);
     }
   }
 }
