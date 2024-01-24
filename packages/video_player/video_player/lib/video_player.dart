@@ -646,6 +646,18 @@ class VideoPlayerController extends ValueNotifier<VideoPlayerValue> {
     return _videoPlayerPlatform.getEmbeddedSubtitles(_textureId);
   }
 
+  Future<List<EmbeddedAudioTrack>> getEmbeddedAuioTracks() async {
+    return _videoPlayerPlatform.getEmbeddedAudioTracks(textureId);
+  }
+
+  Future<void> setEmbeddedAudioTrack(
+      EmbeddedAudioTrack? embeddedAudioTrack, bool disableAudio) async {
+    return _videoPlayerPlatform.setEmbeddedAudioTracks(
+      _textureId,
+      embeddedAudioTrack,
+    );
+  }
+
   /// Select one of the embedded subtitles of the video.
   ///
   /// * It's recommended to get the [EmbeddedSubtitle] instance from [getEmbeddedSubtitles].
@@ -653,7 +665,16 @@ class VideoPlayerController extends ValueNotifier<VideoPlayerValue> {
   ///   The updated caption will only include [value.caption.text].
   /// * Use [EmbeddedSubtitle.none] to prevent [value.caption] from being updated
   ///   and to remove the subtitle
-  Future<void> setEmbeddedSubtitles(EmbeddedSubtitle embeddedSubtitle) async {
+  Future<void> setEmbeddedSubtitles(
+      EmbeddedSubtitle embeddedSubtitle, bool disableSubtitle) async {
+    if (disableSubtitle) {
+      await _videoPlayerPlatform.setEmbeddedSubtitles(
+        _textureId,
+        EmbeddedSubtitle.none(),
+      );
+      value = value.copyWith(embeddedSubtitle: EmbeddedSubtitle.none());
+      return;
+    }
     await _videoPlayerPlatform.setEmbeddedSubtitles(
       _textureId,
       embeddedSubtitle,
