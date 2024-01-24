@@ -109,6 +109,7 @@ abstract class VideoPlayerPlatform extends PlatformInterface {
         'getEmbeddedSubtitles() has not been implemented.');
   }
 
+  /// Get all available embedded audio tracks of the video.
   Future<List<EmbeddedAudioTrack>> getEmbeddedAudioTracks(int textureId) async {
     throw UnimplementedError(
         'getEmbeddedAudioTracks() has not been implemented.');
@@ -123,6 +124,8 @@ abstract class VideoPlayerPlatform extends PlatformInterface {
         'setEmbeddedSubtitles() has not been implemented.');
   }
 
+  /// Sets the embedded audio tracks for the video player.
+  /// This method is asynchronous and returns a `Future<void>`.
   Future<void> setEmbeddedAudioTracks(
     int textureId,
     EmbeddedAudioTrack? embeddedAudioTrack,
@@ -451,11 +454,10 @@ class EmbeddedSubtitle {
   bool get embeddedSubtitleSelected => trackIndex != null;
 }
 
+/// `EmbeddedAudioTrack` is a class that represents an audio track embedded in a video file.
+/// It contains properties and methods related to the audio track.
 class EmbeddedAudioTrack {
-  /// Subtitle option which embedded into video.
-  ///
-  /// * It's recommended not to create a direct instance with this constructor.
-  ///   Try to get it from the video player controller.
+  /// AudioTrack option which embedded into video.
   const EmbeddedAudioTrack({
     required this.language,
     required this.label,
@@ -487,6 +489,7 @@ class EmbeddedAudioTrack {
   /// Subtitle group track render index
   final int? renderIndex;
 
-  /// Checks whether the embedded subtitle is selected or is for removing the subtitle.
+  /// Checks whether the embedded audio track is selected or not.
+  /// Returns `true` if the track index is not null, `false` otherwise.
   bool get embeddedAudioTrackSelected => trackIndex != null;
 }

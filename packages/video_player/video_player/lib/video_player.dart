@@ -19,7 +19,8 @@ export 'package:video_player_platform_interface/video_player_platform_interface.
         DataSourceType,
         VideoFormat,
         VideoPlayerOptions,
-        EmbeddedSubtitle;
+        EmbeddedSubtitle,
+        EmbeddedAudioTrack;
 
 export 'src/closed_caption_file.dart';
 
@@ -57,6 +58,7 @@ class VideoPlayerValue {
     this.rotationCorrection = 0,
     this.errorDescription,
     this.embeddedSubtitle = const EmbeddedSubtitle.none(),
+    this.embeddedAudioTrack = const EmbeddedAudioTrack.none(),
   });
 
   /// Returns an instance for a video that hasn't been loaded.
@@ -128,6 +130,9 @@ class VideoPlayerValue {
   /// The currently selected embedded subtitle from the available subtitles of the video
   final EmbeddedSubtitle embeddedSubtitle;
 
+  /// The currently selected embedded audio track from the available audio tracks of the video
+  final EmbeddedAudioTrack embeddedAudioTrack;
+
   /// Indicates whether or not the video is in an error state. If this is true
   /// [errorDescription] should have information about the problem.
   bool get hasError => errorDescription != null;
@@ -167,6 +172,7 @@ class VideoPlayerValue {
     int? rotationCorrection,
     String? errorDescription = _defaultErrorDescription,
     EmbeddedSubtitle? embeddedSubtitle,
+    EmbeddedAudioTrack? embeddedAudioTrack,
   }) {
     return VideoPlayerValue(
       duration: duration ?? this.duration,
@@ -183,6 +189,7 @@ class VideoPlayerValue {
       playbackSpeed: playbackSpeed ?? this.playbackSpeed,
       rotationCorrection: rotationCorrection ?? this.rotationCorrection,
       embeddedSubtitle: embeddedSubtitle ?? this.embeddedSubtitle,
+      embeddedAudioTrack: embeddedAudioTrack ?? this.embeddedAudioTrack,
       errorDescription: errorDescription != _defaultErrorDescription
           ? errorDescription
           : this.errorDescription,
@@ -646,10 +653,16 @@ class VideoPlayerController extends ValueNotifier<VideoPlayerValue> {
     return _videoPlayerPlatform.getEmbeddedSubtitles(_textureId);
   }
 
+  /// Fetches the list of embedded audio tracks from the video player platform.
+  /// Returns a `Future` that completes with a list of `EmbeddedAudioTrack` objects.
   Future<List<EmbeddedAudioTrack>> getEmbeddedAuioTracks() async {
     return _videoPlayerPlatform.getEmbeddedAudioTracks(textureId);
   }
 
+  /// Sets the embedded audio track for the video player.
+  /// This method is asynchronous and returns a `Future<void>`.
+  /// [embeddedAudioTrack] is the audio track to be set.
+  /// [disableAudio] is a boolean that indicates whether to disable the audio or not.
   Future<void> setEmbeddedAudioTrack(
       EmbeddedAudioTrack? embeddedAudioTrack, bool disableAudio) async {
     return _videoPlayerPlatform.setEmbeddedAudioTracks(
